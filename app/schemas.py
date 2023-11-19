@@ -1,4 +1,4 @@
-from marshmallow import post_dump
+from marshmallow import post_dump, fields
 from marshmallow.decorators import post_dump
 from marshmallow.exceptions import ValidationError
 from marshmallow_sqlalchemy import auto_field
@@ -18,6 +18,10 @@ from app.models import (
     BibContributeur,
     BibRedacteur,
     BibMateriaux,
+    Media,
+    MobilierImage,
+    PersonneMorale,
+    PersonnePhysique,
 )
 
 
@@ -64,6 +68,13 @@ class BibMonuLieuNatureSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
         model = BibMonuLieuNature
 
 
+class MediaSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Media
+
+    url = fields.String()
+
+
 class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MonumentLieu
@@ -76,3 +87,23 @@ class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     contributeurs = Nested(BibContributeur, many=True)
     redacteurs = Nested(BibRedacteurSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
+    medias = Nested(MediaSchema, many=True)
+    categorie = fields.Constant("Monuments - Lieux")
+
+
+class MobilierImageSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MobilierImage
+        include_fk = True
+
+
+class PersonneMoraleSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = PersonneMorale
+        include_fk = True
+
+
+class PersonnePhysiqueSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = PersonnePhysique
+        include_fk = True

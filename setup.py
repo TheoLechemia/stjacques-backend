@@ -30,6 +30,8 @@ setuptools.setup(
         "toml",
         "psycopg2",
         "flask_marshmallow",
+        "flask-cors",
+        "Pillow<10.0.0",
     ],
     extras_require={
         "tests": [

@@ -18,6 +18,9 @@ class MyCustomSelect(CustomSelect):
         self = self.options(*tuple(query_option))
         return self
 
+    def where_publish(self):
+        return self.filter_by(publie=True)
+
 
 class MySelectModel(Model):
     __abstract__ = True

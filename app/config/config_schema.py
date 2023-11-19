@@ -10,3 +10,4 @@ class ConfigSchema(Schema):
             error="Database uri is invalid ex: postgresql://monuser:monpass@server:port/db_name",
         ),
     )
+    MEDIAS_FOLDER = fields.String(required=True)
