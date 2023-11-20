@@ -86,6 +86,17 @@ cor_materiaux_monu_lieu = Table(
     db.Column("monument_lieu_id", ForeignKey("t_monuments_lieux.id_monument_lieu")),
 )
 
+cor_medias_mob_img = Table(
+    "cor_medias_mob_img",
+    db.metadata,
+    db.Column(
+        "media_mob_img_id",
+        ForeignKey("t_medias.id_media"),
+    ),
+    db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
+)
+
+
 cor_medias_monu_lieu = Table(
     "cor_medias_monu_lieu",
     db.metadata,
@@ -94,6 +105,26 @@ cor_medias_monu_lieu = Table(
         ForeignKey("t_medias.id_media"),
     ),
     db.Column("monument_lieu_id", ForeignKey("t_monuments_lieux.id_monument_lieu")),
+)
+
+cor_medias_pers_mo = Table(
+    "cor_medias_pers_mo",
+    db.metadata,
+    db.Column(
+        "media_pers_mo_id",
+        ForeignKey("t_medias.id_media"),
+    ),
+    db.Column("pers_morale_id", ForeignKey("t_pers_morales.id_pers_morale")),
+)
+
+cor_medias_pers_phy = Table(
+    "cor_medias_pers_phy",
+    db.metadata,
+    db.Column(
+        "media_pers_phy_id",
+        ForeignKey("t_medias.id_media"),
+    ),
+    db.Column("pers_physique_id", ForeignKey("t_pers_physiques.id_pers_physique")),
 )
 
 
@@ -172,6 +203,8 @@ class MobilierImage(db.Model):
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
 
+    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_mob_img)
+
 
 class PersonneMorale(db.Model):
     __tablename__ = "t_pers_morales"
@@ -183,6 +216,7 @@ class PersonneMorale(db.Model):
     date_creation: Mapped[str] = mapped_column()
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
+    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_pers_mo)
 
 
 class PersonnePhysique(db.Model):
@@ -194,6 +228,8 @@ class PersonnePhysique(db.Model):
     date_creation: Mapped[str] = mapped_column()
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
+
+    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_pers_phy)
 
 
 class MonumentLieu(db.Model):

@@ -88,7 +88,7 @@ class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     redacteurs = Nested(BibRedacteurSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
     medias = Nested(MediaSchema, many=True)
-    categorie = fields.Constant("Monuments - Lieux")
+    categorie = fields.Constant("Monuments & Lieux")
 
 
 class MobilierImageSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
@@ -96,14 +96,23 @@ class MobilierImageSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         model = MobilierImage
         include_fk = True
 
+    medias = Nested(MediaSchema, many=True)
+    categorie = fields.Constant("Mobilier & Images")
+
 
 class PersonneMoraleSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PersonneMorale
         include_fk = True
 
+    medias = Nested(MediaSchema, many=True)
+    categorie = fields.Constant("Personnes morales")
+
 
 class PersonnePhysiqueSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PersonnePhysique
         include_fk = True
+
+    medias = Nested(MediaSchema, many=True)
+    categorie = fields.Constant("Personnes physiques")
