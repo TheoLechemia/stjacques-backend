@@ -57,16 +57,14 @@ def media():
 def get_all_monuments_lieux():
     params = MultiDict(request.args)
 
-    fields = params.get("fields", type=str, default=[])
-    limit = params.get("limit", type=str, default=100)
+    fields = params.pop("fields", default=[])
+
     if fields:
         fields = fields.split(",")
 
-    q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).where_publish()
-    if limit:
-        q = q.limit(limit)
-    if "random" in params:
-        q = q.order_by(func.random())
+    q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).auto_filters(
+        params, MonumentLieu
+    )
 
     monuments_lieux = db.session.execute(q).unique().scalars()
     # TODO : paginate ?
@@ -98,16 +96,13 @@ def get_one_monument_lieu(id):
 def get_all_mobiliers_images():
     params = MultiDict(request.args)
 
-    fields = params.get("fields", type=str, default=[])
-    limit = params.get("limit", type=str, default=100)
+    fields = params.pop("fields", default=[])
     if fields:
         fields = fields.split(",")
 
-    q = MobilierImage.select.auto_joinload(MobilierImage, fields=fields).where_publish()
-    if limit:
-        q = q.limit(limit)
-    if "random" in params:
-        q = q.order_by(func.random())
+    q = MobilierImage.select.auto_joinload(MobilierImage, fields=fields).auto_filters(
+        params, MobilierImage
+    )
 
     mobilier_images = db.session.execute(q).unique().scalars()
     return MonumentLieuSchema(only=fields).dump(mobilier_images, many=True)
@@ -131,16 +126,13 @@ def get_one_mobiliers_images(id):
 @routes.route("/personnes_morales", methods=["GET"])
 def get_all_personnes_morales():
     params = MultiDict(request.args)
-    fields = params.get("fields", type=str, default=[])
-    limit = params.get("limit", type=str, default=100)
+    fields = params.pop("fields", default=[])
     if fields:
         fields = fields.split(",")
 
-    q = PersonneMorale.select.auto_joinload(PersonneMorale, fields=fields)
-    if limit:
-        q = q.limit(limit)
-    if "random" in params:
-        q = q.order_by(func.random())
+    q = PersonneMorale.select.auto_joinload(PersonneMorale, fields=fields).auto_filters(
+        params, PersonneMorale, False
+    )
 
     personnes_morales = db.session.execute(q).unique().scalars()
     return PersonneMoraleSchema(only=fields).dump(personnes_morales, many=True)
@@ -161,16 +153,13 @@ def get_one_personne_morale(id):
 @routes.route("/personnes_physiques", methods=["GET"])
 def get_all_personnes_physiques():
     params = MultiDict(request.args)
-    fields = params.get("fields", type=str, default=[])
-    limit = params.get("limit", type=str, default=100)
+    fields = params.pop("fields", default=[])
     if fields:
         fields = fields.split(",")
 
-    q = PersonnePhysique.select.auto_joinload(PersonnePhysique, fields=fields)
-    if limit:
-        q = q.limit(limit)
-    if "random" in params:
-        q = q.order_by(func.random())
+    q = PersonnePhysique.select.auto_joinload(
+        PersonnePhysique, fields=fields
+    ).auto_filters(params, PersonnePhysique, False)
 
     personnes_physiques = db.session.execute(q).unique().scalars()
     return PersonnePhysiqueSchema(only=fields).dump(personnes_physiques, many=True)
