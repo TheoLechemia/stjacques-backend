@@ -105,7 +105,7 @@ def get_all_mobiliers_images():
     )
 
     mobilier_images = db.session.execute(q).unique().scalars()
-    return MonumentLieuSchema(only=fields).dump(mobilier_images, many=True)
+    return MobilierImageSchema(only=fields).dump(mobilier_images, many=True)
 
 
 @routes.route("/mobiliers_images/<int:id>", methods=["GET"])
