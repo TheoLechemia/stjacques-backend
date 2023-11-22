@@ -203,7 +203,9 @@ class MobilierImage(db.Model):
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
 
-    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_mob_img)
+    medias: Mapped[List[Media]] = relationship(
+        secondary=cor_medias_mob_img, order_by=Media.id
+    )
 
 
 class PersonneMorale(db.Model):
@@ -216,7 +218,9 @@ class PersonneMorale(db.Model):
     date_creation: Mapped[str] = mapped_column()
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
-    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_pers_mo)
+    medias: Mapped[List[Media]] = relationship(
+        secondary=cor_medias_pers_mo, order_by=Media.id
+    )
 
 
 class PersonnePhysique(db.Model):
@@ -229,7 +233,9 @@ class PersonnePhysique(db.Model):
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
 
-    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_pers_phy)
+    medias: Mapped[List[Media]] = relationship(
+        secondary=cor_medias_pers_phy, order_by=Media.id
+    )
 
 
 class MonumentLieu(db.Model):
@@ -268,4 +274,6 @@ class MonumentLieu(db.Model):
         secondary=cor_materiaux_monu_lieu
     )
 
-    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_monu_lieu)
+    medias: Mapped[List[Media]] = relationship(
+        secondary=cor_medias_monu_lieu, order_by=Media.id
+    )
