@@ -190,6 +190,32 @@ class BibRedacteur(db.Model):
     name: Mapped[str] = mapped_column("redacteur_nom")
 
 
+class Pays(db.Model):
+    __tablename__ = "loc_pays"
+    id: Mapped[int] = mapped_column("id_pays", primary_key=True)
+    name: Mapped[str] = mapped_column("nom_pays")
+
+
+class Region(db.Model):
+    __tablename__ = "loc_regions"
+    id: Mapped[int] = mapped_column("id_region", primary_key=True)
+    name: Mapped[str] = mapped_column("nom_region")
+    id_pays: Mapped[int] = mapped_column()
+
+
+class Departement(db.Model):
+    __tablename__ = "loc_departements"
+    id: Mapped[int] = mapped_column("id_departement", primary_key=True)
+    name: Mapped[str] = mapped_column("nom_departement")
+    id_region: Mapped[int] = mapped_column()
+
+
+class Commune(db.Model):
+    __tablename__ = "loc_communes"
+    id: Mapped[int] = mapped_column("id_commune", primary_key=True)
+    name: Mapped[str] = mapped_column("nom_commune")
+
+
 class MobilierImage(db.Model):
     __tablename__ = "t_mobiliers_images"
 

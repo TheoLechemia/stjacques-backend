@@ -10,13 +10,26 @@ from PIL import Image, ImageOps
 
 routes = Blueprint("main", __name__)
 
-from app.models import MonumentLieu, MobilierImage, PersonneMorale, PersonnePhysique
+from app.models import (
+    MonumentLieu,
+    MobilierImage,
+    PersonneMorale,
+    PersonnePhysique,
+    Pays,
+    Region,
+    Departement,
+    Commune,
+)
 from app.env import db
 from app.schemas import (
     MonumentLieuSchema,
     MobilierImageSchema,
     PersonneMoraleSchema,
     PersonnePhysiqueSchema,
+    PaysSchema,
+    RegionSchema,
+    DepartementSchema,
+    CommuneSchema,
 )
 
 
@@ -51,6 +64,42 @@ def media():
             return send_file(thum_path)
 
     return send_file(file)
+
+
+@routes.route("/pays", methods=["GET"])
+def get_all_countries():
+    return PaysSchema().dump(
+        db.session.execute(Pays.select.order_by(Pays.name)).scalars(), many=True
+    )
+
+
+@routes.route("/regions", methods=["GET"])
+def get_all_regions():
+    return RegionSchema().dump(
+        db.session.execute(Region.select.order_by(Region.name)).scalars(), many=True
+    )
+
+
+@routes.route("/departements", methods=["GET"])
+def get_all_departments():
+    return DepartementSchema().dump(
+        db.session.execute(Departement.select.order_by(Departement.name)).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/communes", methods=["GET"])
+def get_all_communes():
+    params = MultiDict(request.args)
+    limit = params.get("limit", 50)
+
+    query = Commune.select.order_by(Commune.name).limit(limit)
+    if "name" in params:
+        query = query.filter(Commune.name.ilike(params["name"] + "%"))
+    return CommuneSchema().dump(
+        db.session.execute(query).scalars(),
+        many=True,
+    )
 
 
 @routes.route("/monuments_lieux", methods=["GET"])

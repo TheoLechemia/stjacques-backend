@@ -22,6 +22,10 @@ from app.models import (
     MobilierImage,
     PersonneMorale,
     PersonnePhysique,
+    Pays,
+    Region,
+    Departement,
+    Commune,
 )
 
 
@@ -73,6 +77,26 @@ class MediaSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         model = Media
 
     url = fields.String()
+
+
+class PaysSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Pays
+
+
+class RegionSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Region
+
+
+class DepartementSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Departement
+
+
+class CommuneSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Commune
 
 
 class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
