@@ -11,3 +11,4 @@ class ConfigSchema(Schema):
         ),
     )
     MEDIAS_FOLDER = fields.String(required=True)
+    APPLICATION_ROOT = fields.String(load_default="")

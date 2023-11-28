@@ -2,6 +2,8 @@ from flask import Flask, send_from_directory
 from pathlib import Path
 
 from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 # from flask_sqlalchemy_app.env import db
 # from .config.config import config
@@ -13,6 +15,8 @@ from app.env import APP_DIR, db, ma
 
 def create_app():
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_host=1)
+
     app.config.update(config)
     db.init_app(app)
     ma.init_app(app)
