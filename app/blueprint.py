@@ -206,7 +206,7 @@ def get_all_monuments_lieux():
         fields = fields.split(",")
 
     q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).auto_filters(
-        params, MonumentLieu
+        params, MonumentLieu, False
     )
 
     monuments_lieux = db.session.execute(q).unique().scalars()

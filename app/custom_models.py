@@ -1,4 +1,3 @@
-from sqlalchemy import func
 from sqlalchemy.orm import raiseload, joinedload
 
 from flask_sqlalchemy import SQLAlchemy
@@ -17,26 +16,6 @@ class MyCustomSelect(CustomSelect):
             if f in model.__mapper__.relationships:
                 query_option.append(joinedload(getattr(model, f)))
         self = self.options(*tuple(query_option))
-        return self
-
-    def where_publish(self):
-        return self.filter_by(publie=True)
-
-    def where_has_media(self, model):
-        return self.filter(model.medias.any())
-
-    def auto_filters(self, params, model, remove_publish=True):
-        if "has_medias" in params and params["has_medias"] == "true":
-            params.pop("has_medias")
-            self = self.filter(model.medias.any())
-        if "random" in params:
-            self = self.order_by(func.random())
-        if "limit" in params:
-            self = self.limit(params.pop("limit"))
-
-        # force publish
-        if remove_publish:
-            self = self.where_publish()
         return self
 
 
