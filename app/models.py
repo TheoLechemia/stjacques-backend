@@ -150,44 +150,74 @@ class Media(db.Model):
 
 class BibMateriaux(db.Model):
     __tablename__ = "bib_materiaux"
-    id_materiau: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column("id_materiau", primary_key=True)
     name: Mapped[str] = mapped_column("materiau_type")
+
+
+class BibDesignationMobImg(db.Model):
+    __tablename__ = "bib_mob_img_designations"
+    id: Mapped[int] = mapped_column("id_designation", primary_key=True)
+    name: Mapped[str] = mapped_column("designation_type")
 
 
 class BibContributeur(db.Model):
     __tablename__ = "bib_contributeur"
-    id_contributeur: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column("id_contributeur", primary_key=True)
     name: Mapped[str] = mapped_column("contributeur_nom")
 
 
 class BibSiecle(db.Model):
     __tablename__ = "bib_siecle"
-    id_siecle: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column("id_siecle", primary_key=True)
     name: Mapped[str] = mapped_column("siecle_list")
 
 
 class BibMonuLieuNature(db.Model):
     __tablename__ = "bib_monu_lieu_natures"
-    id_monu_lieu_nature: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column("id_monu_lieu_nature", primary_key=True)
     name: Mapped[str] = mapped_column("monu_lieu_nature_type")
 
 
 class BibEtatConservation(db.Model):
     __tablename__ = "bib_etats_conservation"
-    id_etat_conservation: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column("id_etat_conservation", primary_key=True)
     name: Mapped[str] = mapped_column("etat_conservation_type")
 
 
 class BibSourceAuteur(db.Model):
     __tablename__ = "bib_source_auteur"
-    id_source_auteur: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column("id_source_auteur", primary_key=True)
     name: Mapped[str] = mapped_column("source_auteur")
 
 
 class BibRedacteur(db.Model):
     __tablename__ = "bib_redacteur"
-    id_redacteur: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column("id_redacteur", primary_key=True)
     name: Mapped[str] = mapped_column("redacteur_nom")
+
+
+class BibTechniquesMob(db.Model):
+    __tablename__ = "bib_mob_img_techniques"
+    id: Mapped[int] = mapped_column("id_technique", primary_key=True)
+    name: Mapped[str] = mapped_column("technique_type")
+
+
+class BibNaturesPersonnesMorales(db.Model):
+    __tablename__ = "bib_pers_mo_natures"
+    id: Mapped[int] = mapped_column("id_pers_mo_nature", primary_key=True)
+    name: Mapped[str] = mapped_column("pers_mo_nature_type")
+
+
+class BibProfessions(db.Model):
+    __tablename__ = "bib_pers_phy_professions"
+    id: Mapped[int] = mapped_column("id_profession", primary_key=True)
+    name: Mapped[str] = mapped_column("profession_type")
+
+
+class BibDeplacements(db.Model):
+    __tablename__ = "bib_pers_phy_modes_deplacements"
+    id: Mapped[int] = mapped_column("id_mode_deplacement", primary_key=True)
+    name: Mapped[str] = mapped_column("mode_deplacement_type")
 
 
 class Pays(db.Model):

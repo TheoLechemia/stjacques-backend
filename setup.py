@@ -18,8 +18,8 @@ setuptools.setup(
     url="https://github.com/PnX-SI/GeoNature/",
     python_requires=">=3.9",
     version=version,
-    packages=setuptools.find_packages("app"),
-    package_dir={"": "app"},
+    packages=setuptools.find_packages("./"),
+    package_dir={"": "."},
     install_requires=[
         "flask",
         "sqlalchemy",

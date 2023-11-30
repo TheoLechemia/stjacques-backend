@@ -26,6 +26,11 @@ from app.models import (
     Region,
     Departement,
     Commune,
+    BibDesignationMobImg,
+    BibTechniquesMob,
+    BibNaturesPersonnesMorales,
+    BibProfessions,
+    BibDeplacements,
 )
 
 
@@ -37,7 +42,12 @@ class FlattenMixin:
         return data[self.__flatten_key__]
 
 
-class BibSiecleSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+class BibSiecleSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibSiecle
+
+
+class BibSiecleFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
         model = BibSiecle
 
@@ -57,7 +67,12 @@ class BibContributeur(ma.SQLAlchemyAutoSchema, FlattenMixin):
         model = BibContributeur
 
 
-class BibEtatConservationSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+class BibEtatConservationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibEtatConservation
+
+
+class BibEtatConservationFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
         model = BibEtatConservation
 
@@ -67,9 +82,39 @@ class BibSourceAuteurSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
         model = BibSourceAuteur
 
 
-class BibMonuLieuNatureSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+class BibMonuLieuNatureSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = BibMonuLieuNature
+
+
+class BibNaturesPersonnesMoralesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibNaturesPersonnesMorales
+
+
+class BibProfessionSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibProfessions
+
+
+class BibMonuLieuNatureFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = BibMonuLieuNature
+
+
+class BibDeplacementsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibDeplacements
+
+
+class BibDesignationMobImgSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibDesignationMobImg
+
+
+class BibTechniquesMobSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibTechniquesMob
 
 
 class MediaSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
@@ -104,9 +149,9 @@ class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         model = MonumentLieu
         include_fk = True
 
-    siecles = Nested(BibSiecleSchema, many=True)
-    natures = Nested(BibMonuLieuNatureSchema, many=True)
-    etat_conservation = Nested(BibEtatConservationSchema, many=True)
+    siecles = Nested(BibSiecleFlattenSchema, many=True)
+    natures = Nested(BibMonuLieuNatureFlattenSchema, many=True)
+    etat_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
     auteurs = Nested(BibSourceAuteurSchema, many=True)
     contributeurs = Nested(BibContributeur, many=True)
     redacteurs = Nested(BibRedacteurSchema, many=True)

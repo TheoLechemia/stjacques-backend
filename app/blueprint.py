@@ -19,6 +19,14 @@ from app.models import (
     Region,
     Departement,
     Commune,
+    BibSiecle,
+    BibEtatConservation,
+    BibMonuLieuNature,
+    BibDesignationMobImg,
+    BibTechniquesMob,
+    BibNaturesPersonnesMorales,
+    BibProfessions,
+    BibDeplacements,
 )
 from app.env import db
 from app.schemas import (
@@ -30,6 +38,14 @@ from app.schemas import (
     RegionSchema,
     DepartementSchema,
     CommuneSchema,
+    BibSiecleSchema,
+    BibEtatConservationSchema,
+    BibMonuLieuNatureSchema,
+    BibDesignationMobImgSchema,
+    BibTechniquesMobSchema,
+    BibNaturesPersonnesMoralesSchema,
+    BibProfessionSchema,
+    BibDeplacementsSchema,
 )
 
 
@@ -84,6 +100,84 @@ def get_all_regions():
 def get_all_departments():
     return DepartementSchema().dump(
         db.session.execute(Departement.select.order_by(Departement.name)).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/siecles", methods=["GET"])
+def get_all_siecles():
+    return BibSiecleSchema().dump(
+        db.session.execute(BibSiecle.select.order_by(BibSiecle.id)).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/etats_conservation", methods=["GET"])
+def get_all_etat_conservation():
+    return BibEtatConservationSchema().dump(
+        db.session.execute(
+            BibEtatConservation.select.order_by(BibEtatConservation.name)
+        ).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/natures_monu", methods=["GET"])
+def get_all_natures_monu():
+    return BibMonuLieuNatureSchema().dump(
+        db.session.execute(
+            BibMonuLieuNature.select.order_by(BibMonuLieuNature.name)
+        ).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/designations_mob", methods=["GET"])
+def get_all_designations_mob():
+    return BibDesignationMobImgSchema().dump(
+        db.session.execute(
+            BibDesignationMobImg.select.order_by(BibDesignationMobImg.name)
+        ).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/techniques_mob", methods=["GET"])
+def get_all_techniques_mob():
+    return BibTechniquesMobSchema().dump(
+        db.session.execute(
+            BibTechniquesMob.select.order_by(BibTechniquesMob.name)
+        ).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/natures_personnes_morales", methods=["GET"])
+def get_all_natures_personnes_morales():
+    return BibNaturesPersonnesMoralesSchema().dump(
+        db.session.execute(
+            BibNaturesPersonnesMorales.select.order_by(BibNaturesPersonnesMorales.name)
+        ).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/professions", methods=["GET"])
+def get_all_natures_professions():
+    return BibProfessionSchema().dump(
+        db.session.execute(
+            BibProfessions.select.order_by(BibProfessions.name)
+        ).scalars(),
+        many=True,
+    )
+
+
+@routes.route("/deplacements", methods=["GET"])
+def get_all_deplacements():
+    return BibDeplacementsSchema().dump(
+        db.session.execute(
+            BibDeplacements.select.order_by(BibDeplacements.name)
+        ).scalars(),
         many=True,
     )
 
