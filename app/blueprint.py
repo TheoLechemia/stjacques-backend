@@ -196,7 +196,7 @@ def get_all_communes():
     )
 
 
-@routes.route("/monuments_lieux", methods=["GET"])
+@routes.route("/monuments_lieux", methods=["GET", "POST"])
 def get_all_monuments_lieux():
     params = MultiDict(request.args)
 
@@ -235,9 +235,13 @@ def get_one_monument_lieu(id):
 ##### MOBILIER IMAGE
 
 
-@routes.route("/mobiliers_images", methods=["GET"])
+@routes.route("/mobiliers_images", methods=["GET", "POST"])
 def get_all_mobiliers_images():
     params = MultiDict(request.args)
+    print(request.headers)
+    # print("LAAAAAAAAAAAAAAAAAaa")
+    json_data = request.get_json()
+    print(json_data)
 
     fields = params.pop("fields", default=[])
     if fields:
@@ -266,7 +270,7 @@ def get_one_mobiliers_images(id):
 ## Personnes morales
 
 
-@routes.route("/personnes_morales", methods=["GET"])
+@routes.route("/personnes_morales", methods=["GET", "POST"])
 def get_all_personnes_morales():
     params = MultiDict(request.args)
     fields = params.pop("fields", default=[])
@@ -293,7 +297,7 @@ def get_one_personne_morale(id):
     return PersonneMoraleSchema(only=fields).dump(persone_morale)
 
 
-@routes.route("/personnes_physiques", methods=["GET"])
+@routes.route("/personnes_physiques", methods=["GET", "POST"])
 def get_all_personnes_physiques():
     params = MultiDict(request.args)
     fields = params.pop("fields", default=[])

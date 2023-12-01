@@ -173,6 +173,27 @@ cor_professions_pers_phy = Table(
 )
 
 
+cor_designations_mob_img = Table(
+    "cor_designations_mob_img",
+    db.metadata,
+    db.Column(
+        "designation_id",
+        ForeignKey("bib_mob_img_designations.id_designation"),
+    ),
+    db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
+)
+
+cor_techniques_mob_img = Table(
+    "cor_techniques_mob_img",
+    db.metadata,
+    db.Column(
+        "technique_id",
+        ForeignKey("bib_mob_img_techniques.id_technique"),
+    ),
+    db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
+)
+
+
 class Media(db.Model):
     __tablename__ = "t_medias"
     id: Mapped[int] = mapped_column("id_media", primary_key=True)
@@ -349,6 +370,18 @@ class CategorieSelect(MyCustomSelect):
                 self = self.filter(
                     model.professions.any(BibProfessions.id.in_(professions))
                 )
+        if "designations" in params:
+            if hasattr(model, "designations"):
+                designations = params.getlist("designations")
+                self = self.filter(
+                    model.designations.any(BibDesignationMobImg.id.in_(designations))
+                )
+        if "techniques" in params:
+            if hasattr(model, "techniques"):
+                techniques = params.getlist("techniques")
+                self = self.filter(
+                    model.techniques.any(BibTechniquesMob.id.in_(techniques))
+                )
 
         if "random" in params:
             self = self.order_by(func.random())
@@ -386,6 +419,12 @@ class MobilierImage(db.Model):
     )
     etat_conservation: Mapped[List[BibEtatConservation]] = relationship(
         secondary=cor_etat_cons_mob_img
+    )
+    designations: Mapped[List[BibDesignationMobImg]] = relationship(
+        secondary=cor_designations_mob_img
+    )
+    techniques: Mapped[List[BibTechniquesMob]] = relationship(
+        secondary=cor_techniques_mob_img
     )
 
 
