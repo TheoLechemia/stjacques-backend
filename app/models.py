@@ -15,12 +15,6 @@ from sqlalchemy import func
 from app.custom_models import MyCustomSelect
 
 
-# class Organism(db.Model):
-#     __tablename__ = "bib_organismes"
-#     __table_args__ = {"schema": "utilisateurs"}
-#     id_organisme: Mapped[int] = mapped_column(Integer, primary_key=True)
-#     nom_organisme: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-
 cor_siecles_monu_lieu = Table(
     "cor_siecles_monu_lieu",
     db.metadata,
@@ -28,6 +22,34 @@ cor_siecles_monu_lieu = Table(
     db.Column("monument_lieu_id", ForeignKey("t_monuments_lieux.id_monument_lieu")),
 )
 
+cor_siecles_pers_mo = Table(
+    "cor_siecles_pers_mo",
+    db.metadata,
+    db.Column("siecle_pers_mo_id", ForeignKey("bib_siecle.id_siecle")),
+    db.Column("pers_morale_id", ForeignKey("t_pers_morales.id_pers_morale")),
+)
+
+cor_siecles_pers_phy = Table(
+    "cor_siecles_pers_phy",
+    db.metadata,
+    db.Column("siecle_pers_phy_id", ForeignKey("bib_siecle.id_siecle")),
+    db.Column("pers_physique_id", ForeignKey("t_pers_physiques.id_pers_physique")),
+)
+
+cor_siecles_mob_img = Table(
+    "cor_siecles_mob_img",
+    db.metadata,
+    db.Column("siecle_mob_img_id", ForeignKey("bib_siecle.id_siecle")),
+    db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
+)
+
+
+cor_materiaux_mob_img = Table(
+    "cor_materiaux_mob_img",
+    db.metadata,
+    db.Column("materiau_mob_img_id", ForeignKey("bib_materiaux.id_materiau")),
+    db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
+)
 
 cor_natures_monu_lieu = Table(
     "cor_natures_monu_lieu",
@@ -172,6 +194,16 @@ cor_professions_pers_phy = Table(
     db.Column("pers_physique_id", ForeignKey("t_pers_physiques.id_pers_physique")),
 )
 
+cor_periodes_historiques_pers_phy = Table(
+    "cor_periodes_historiques_pers_phy",
+    db.metadata,
+    db.Column(
+        "periode_historique_id",
+        ForeignKey("bib_pers_phy_periodes_historiques.id_periode_historique"),
+    ),
+    db.Column("pers_physique_id", ForeignKey("t_pers_physiques.id_pers_physique")),
+)
+
 
 cor_designations_mob_img = Table(
     "cor_designations_mob_img",
@@ -284,6 +316,12 @@ class BibDeplacements(db.Model):
     __tablename__ = "bib_pers_phy_modes_deplacements"
     id: Mapped[int] = mapped_column("id_mode_deplacement", primary_key=True)
     name: Mapped[str] = mapped_column("mode_deplacement_type")
+
+
+class BibPerdiodesHisto(db.Model):
+    __tablename__ = "bib_pers_phy_periodes_historiques"
+    id: Mapped[int] = mapped_column("id_periode_historique", primary_key=True)
+    name: Mapped[str] = mapped_column("periode_historique_type")
 
 
 class Pays(db.Model):
@@ -417,7 +455,7 @@ class MobilierImage(db.Model):
     medias: Mapped[List[Media]] = relationship(
         secondary=cor_medias_mob_img, order_by=Media.id
     )
-    etat_conservation: Mapped[List[BibEtatConservation]] = relationship(
+    etats_conservation: Mapped[List[BibEtatConservation]] = relationship(
         secondary=cor_etat_cons_mob_img
     )
     designations: Mapped[List[BibDesignationMobImg]] = relationship(
@@ -426,6 +464,13 @@ class MobilierImage(db.Model):
     techniques: Mapped[List[BibTechniquesMob]] = relationship(
         secondary=cor_techniques_mob_img
     )
+    materiaux: Mapped[List[BibMateriaux]] = relationship(
+        secondary=cor_materiaux_mob_img
+    )
+
+    siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_mob_img)
+    pays: Mapped[List[Pays]] = relationship()
+    commune: Mapped[List[Commune]] = relationship()
 
 
 class PersonneMorale(db.Model):
@@ -448,6 +493,9 @@ class PersonneMorale(db.Model):
     natures: Mapped[List[BibNaturesPersonnesMorales]] = relationship(
         secondary=cor_natures_pers_mo
     )
+    siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_pers_mo)
+    pays: Mapped[List[Pays]] = relationship()
+    commune: Mapped[List[Commune]] = relationship()
 
 
 class PersonnePhysique(db.Model):
@@ -472,6 +520,13 @@ class PersonnePhysique(db.Model):
     professions: Mapped[List[BibProfessions]] = relationship(
         secondary=cor_professions_pers_phy
     )
+    periodes_historiques: Mapped[List[BibPerdiodesHisto]] = relationship(
+        secondary=cor_periodes_historiques_pers_phy
+    )
+
+    siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_pers_phy)
+    pays: Mapped[List[Pays]] = relationship()
+    commune: Mapped[List[Commune]] = relationship()
 
 
 class MonumentLieu(db.Model):
@@ -491,12 +546,14 @@ class MonumentLieu(db.Model):
     id_pays: Mapped[int] = mapped_column(ForeignKey("loc_pays.id_pays"))
     id_commune: Mapped[int] = mapped_column(ForeignKey("loc_communes.id_commune"))
 
+    pays: Mapped[List[Pays]] = relationship()
+    commune: Mapped[List[Commune]] = relationship()
     siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_monu_lieu)
 
     natures: Mapped[List[BibMonuLieuNature]] = relationship(
         secondary=cor_natures_monu_lieu
     )
-    etat_conservation: Mapped[List[BibEtatConservation]] = relationship(
+    etats_conservation: Mapped[List[BibEtatConservation]] = relationship(
         secondary=cor_etat_cons_monu_lieu
     )
     auteurs: Mapped[List[BibSourceAuteur]] = relationship(

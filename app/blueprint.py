@@ -196,9 +196,17 @@ def get_all_communes():
     )
 
 
+############################################################
+#################### END BIBS ##############################
+############################################################
+
+
 @routes.route("/monuments_lieux", methods=["GET", "POST"])
 def get_all_monuments_lieux():
     params = MultiDict(request.args)
+    if request.method == "POST" and request.is_json:
+        json_data = request.get_json()
+        params.update(json_data)
 
     fields = params.pop("fields", default=[])
 
@@ -218,12 +226,16 @@ def get_all_monuments_lieux():
 @routes.route("/monuments_lieux/<int:id>", methods=["GET"])
 def get_one_monument_lieu(id):
     fields = [
-        "etat_conservation",
+        "etats_conservation",
         "auteurs",
         "contributeurs",
         "redacteurs",
         "materiaux",
         "medias",
+        "natures",
+        "siecles",
+        "pays",
+        "commune",
     ]
     q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).filter_by(id=id)
     monument_lieu = db.session.execute(q).unique().scalars().one_or_none()
@@ -238,10 +250,9 @@ def get_one_monument_lieu(id):
 @routes.route("/mobiliers_images", methods=["GET", "POST"])
 def get_all_mobiliers_images():
     params = MultiDict(request.args)
-    print(request.headers)
-    # print("LAAAAAAAAAAAAAAAAAaa")
-    json_data = request.get_json()
-    print(json_data)
+    if request.method == "POST" and request.is_json:
+        json_data = request.get_json()
+        params.update(json_data)
 
     fields = params.pop("fields", default=[])
     if fields:
@@ -257,7 +268,15 @@ def get_all_mobiliers_images():
 
 @routes.route("/mobiliers_images/<int:id>", methods=["GET"])
 def get_one_mobiliers_images(id):
-    fields = []
+    fields = [
+        "designations",
+        "commune",
+        "pays",
+        "siecles",
+        "etats_conservation",
+        "materiaux",
+        "medias",
+    ]
     q = MobilierImage.select.auto_joinload(MobilierImage, fields=fields).filter_by(
         id=id
     )
@@ -273,6 +292,9 @@ def get_one_mobiliers_images(id):
 @routes.route("/personnes_morales", methods=["GET", "POST"])
 def get_all_personnes_morales():
     params = MultiDict(request.args)
+    if request.method == "POST" and request.is_json:
+        json_data = request.get_json()
+        params.update(json_data)
     fields = params.pop("fields", default=[])
     if fields:
         fields = fields.split(",")
@@ -287,7 +309,7 @@ def get_all_personnes_morales():
 
 @routes.route("/personnes_morales/<int:id>", methods=["GET"])
 def get_one_personne_morale(id):
-    fields = []
+    fields = ["natures", "pays", "commune", "siecles", "medias"]
     q = PersonneMorale.select.auto_joinload(PersonneMorale, fields=fields).filter_by(
         id=id
     )
@@ -300,6 +322,9 @@ def get_one_personne_morale(id):
 @routes.route("/personnes_physiques", methods=["GET", "POST"])
 def get_all_personnes_physiques():
     params = MultiDict(request.args)
+    if request.method == "POST" and request.is_json:
+        json_data = request.get_json()
+        params.update(json_data)
     fields = params.pop("fields", default=[])
     if fields:
         fields = fields.split(",")
@@ -314,7 +339,14 @@ def get_all_personnes_physiques():
 
 @routes.route("/personnes_physiques/<int:id>", methods=["GET"])
 def get_one_personne_physique(id):
-    fields = []
+    fields = [
+        "medias",
+        "siecles",
+        "pays",
+        "commune",
+        "modes_deplacements",
+        "periodes_historiques",
+    ]
     q = PersonnePhysique.select.auto_joinload(
         PersonnePhysique, fields=fields
     ).filter_by(id=id)

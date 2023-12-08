@@ -31,6 +31,7 @@ from app.models import (
     BibNaturesPersonnesMorales,
     BibProfessions,
     BibDeplacements,
+    BibPerdiodesHisto,
 )
 
 
@@ -50,6 +51,11 @@ class BibSiecleSchema(ma.SQLAlchemyAutoSchema):
 class BibSiecleFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
         model = BibSiecle
+
+
+class BibPerdiodesHistoFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = BibPerdiodesHisto
 
 
 class BibMateriauxSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
@@ -92,6 +98,11 @@ class BibNaturesPersonnesMoralesSchema(ma.SQLAlchemyAutoSchema):
         model = BibNaturesPersonnesMorales
 
 
+class BibNaturesPersonnesMoralesFlattendSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = BibNaturesPersonnesMorales
+
+
 class BibProfessionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = BibProfessions
@@ -107,7 +118,17 @@ class BibDeplacementsSchema(ma.SQLAlchemyAutoSchema):
         model = BibDeplacements
 
 
+class BibDeplacementsFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = BibDeplacements
+
+
 class BibDesignationMobImgSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibDesignationMobImg
+
+
+class BibDesignationMobImgSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
         model = BibDesignationMobImg
 
@@ -122,6 +143,11 @@ class MediaSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         model = Media
 
     url = fields.String()
+
+
+class PaysSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = Pays
 
 
 class PaysSchema(ma.SQLAlchemyAutoSchema):
@@ -139,7 +165,12 @@ class DepartementSchema(ma.SQLAlchemyAutoSchema):
         model = Departement
 
 
-class CommuneSchema(ma.SQLAlchemyAutoSchema):
+class CommuneSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = Commune
+
+
+class CommuneSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
         model = Commune
 
@@ -151,8 +182,10 @@ class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
 
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     natures = Nested(BibMonuLieuNatureFlattenSchema, many=True)
-    etat_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
+    etats_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
     auteurs = Nested(BibSourceAuteurSchema, many=True)
+    pays = Nested(PaysSchemaFlatten)
+    commune = Nested(CommuneSchemaFlatten)
     contributeurs = Nested(BibContributeur, many=True)
     redacteurs = Nested(BibRedacteurSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
@@ -167,6 +200,13 @@ class MobilierImageSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         include_fk = True
 
     medias = Nested(MediaSchema, many=True)
+    siecles = Nested(BibSiecleFlattenSchema, many=True)
+    pays = Nested(PaysSchemaFlatten)
+    commune = Nested(CommuneSchemaFlatten)
+    designations = Nested(BibDesignationMobImgSchemaFlatten, many=True)
+    etats_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
+    materiaux = Nested(BibMateriauxSchema, many=True)
+
     categorie = fields.Constant("Mobilier & Images")
     meta_categorie = fields.Constant("mobiliers_images")
 
@@ -177,6 +217,11 @@ class PersonneMoraleSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         include_fk = True
 
     medias = Nested(MediaSchema, many=True)
+    siecles = Nested(BibSiecleFlattenSchema, many=True)
+    natures = Nested(BibNaturesPersonnesMoralesFlattendSchema, many=True)
+    pays = Nested(PaysSchemaFlatten)
+    commune = Nested(CommuneSchemaFlatten)
+
     categorie = fields.Constant("Personnes morales")
     meta_categorie = fields.Constant("personnes_morales")
 
@@ -187,5 +232,12 @@ class PersonnePhysiqueSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         include_fk = True
 
     medias = Nested(MediaSchema, many=True)
+    modes_deplacements = Nested(BibDeplacementsFlattenSchema, many=True)
+    periodes_historiques = Nested(BibPerdiodesHistoFlattenSchema, many=True)
+
+    siecles = Nested(BibSiecleFlattenSchema, many=True)
+    pays = Nested(PaysSchemaFlatten)
+    commune = Nested(CommuneSchemaFlatten)
+
     categorie = fields.Constant("Personnes physiques")
     meta_categorie = fields.Constant("personnes_physiques")
