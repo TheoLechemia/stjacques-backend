@@ -160,14 +160,28 @@ class RegionSchema(ma.SQLAlchemyAutoSchema):
         model = Region
 
 
+class RegionFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = Region
+
+
 class DepartementSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Departement
 
+    region = fields.Nested(RegionSchema)
 
-class CommuneSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+
+class DepartementFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = Departement
+
+
+class CommuneSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Commune
+
+    departement = fields.Nested(DepartementSchema)
 
 
 class CommuneSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
@@ -175,7 +189,33 @@ class CommuneSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
         model = Commune
 
 
-class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+class FlatteLocaliteMixin:
+    @post_dump
+    def flat_loc(self, data, **kw):
+        if (
+            "commune" in data
+            and type(data["commune"]) is dict
+            and data["commune"] is not None
+        ):
+            data["_departement"] = (
+                data.get("commune", {}).get("departement", {}).get("name", "")
+            )
+            data["_region"] = (
+                data.get("commune", {})
+                .get("departement", {})
+                .get("region")
+                .get("name", "")
+            )
+            # data["_commune"] = data.get("commune", {}).get("name")
+            # data["commune"] = data.pop("_commune")
+            # data["commune"] = data.pop("_commune")
+            # data["region"] = data.pop("_region")
+        return data
+
+
+class MonumentLieuSchema(
+    SmartRelationshipsMixin, FlatteLocaliteMixin, ma.SQLAlchemyAutoSchema
+):
     class Meta:
         model = MonumentLieu
         include_fk = True
@@ -186,15 +226,24 @@ class MonumentLieuSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     auteurs = Nested(BibSourceAuteurSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchemaFlatten)
+    departement = Nested(DepartementFlattenSchema)
+    region = Nested(RegionFlattenSchema)
     contributeurs = Nested(BibContributeur, many=True)
     redacteurs = Nested(BibRedacteurSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
+
     medias = Nested(MediaSchema, many=True)
     categorie = fields.Constant("Monuments & Lieux")
     meta_categorie = fields.Constant("monuments_lieux")
 
+    mobiliers_images_liees = Nested("MobilierImageSchema", many=True)
+    personnes_morales_liees = Nested("PersonneMoraleSchema", many=True)
+    personnes_physiques_liees = Nested("PersonnePhysiqueSchema", many=True)
 
-class MobilierImageSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+
+class MobilierImageSchema(
+    SmartRelationshipsMixin, FlatteLocaliteMixin, ma.SQLAlchemyAutoSchema
+):
     class Meta:
         model = MobilierImage
         include_fk = True
@@ -203,15 +252,21 @@ class MobilierImageSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchemaFlatten)
+    departement = Nested(DepartementFlattenSchema)
+    region = Nested(RegionFlattenSchema)
     designations = Nested(BibDesignationMobImgSchemaFlatten, many=True)
     etats_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
+    personnes_morales_liees = Nested("PersonneMoraleSchema", many=True)
+    monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
 
     categorie = fields.Constant("Mobilier & Images")
     meta_categorie = fields.Constant("mobiliers_images")
 
 
-class PersonneMoraleSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+class PersonneMoraleSchema(
+    SmartRelationshipsMixin, FlatteLocaliteMixin, ma.SQLAlchemyAutoSchema
+):
     class Meta:
         model = PersonneMorale
         include_fk = True
@@ -220,13 +275,19 @@ class PersonneMoraleSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     natures = Nested(BibNaturesPersonnesMoralesFlattendSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
-    commune = Nested(CommuneSchemaFlatten)
+    commune = Nested(CommuneSchema)
+
+    mobiliers_images_liees = Nested("MobilierImageSchema", many=True)
+    personnes_physiques_liees = Nested("PersonnePhysiqueSchema", many=True)
+    monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
 
     categorie = fields.Constant("Personnes morales")
     meta_categorie = fields.Constant("personnes_morales")
 
 
-class PersonnePhysiqueSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+class PersonnePhysiqueSchema(
+    SmartRelationshipsMixin, FlatteLocaliteMixin, ma.SQLAlchemyAutoSchema
+):
     class Meta:
         model = PersonnePhysique
         include_fk = True
@@ -238,6 +299,12 @@ class PersonnePhysiqueSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchemaFlatten)
+    personnes_morales_liees = Nested(PersonneMoraleSchema, many=True)
+    monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
 
     categorie = fields.Constant("Personnes physiques")
     meta_categorie = fields.Constant("personnes_physiques")
+
+
+# MonumentLieu.personnes_morales_liees = Nested(PersonneMoraleSchema, many=True)
+# MonumentLieu.personnes_physiques_liees = Nested(PersonnePhysiqueSchema, many=True)

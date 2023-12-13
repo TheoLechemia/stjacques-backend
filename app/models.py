@@ -8,11 +8,12 @@ from typing import List
 from sqlalchemy import Integer, String, ForeignKey, Table, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-
-
 from sqlalchemy.sql.expression import Select
+
+
+from sqlalchemy.orm import raiseload, joinedload
+
 from sqlalchemy import func
-from app.custom_models import MyCustomSelect
 
 
 cor_siecles_monu_lieu = Table(
@@ -226,6 +227,60 @@ cor_techniques_mob_img = Table(
 )
 
 
+cor_monu_lieu_mob_img = Table(
+    "cor_monu_lieu_mob_img",
+    db.metadata,
+    db.Column(
+        "monument_lieu_id",
+        ForeignKey("t_monuments_lieux.id_monument_lieu"),
+    ),
+    db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
+)
+
+cor_monu_lieu_pers_mo = Table(
+    "cor_monu_lieu_pers_mo",
+    db.metadata,
+    db.Column(
+        "monument_lieu_id",
+        ForeignKey("t_monuments_lieux.id_monument_lieu"),
+    ),
+    db.Column("pers_morale_id", ForeignKey("t_pers_morales.id_pers_morale")),
+)
+
+
+cor_mob_img_pers_mo = Table(
+    "cor_mob_img_pers_mo",
+    db.metadata,
+    db.Column(
+        "mobilier_image_id",
+        ForeignKey("t_mobiliers_images.id_mobilier_image"),
+    ),
+    db.Column("pers_morale_id", ForeignKey("t_pers_morales.id_pers_morale")),
+)
+
+
+cor_monu_lieu_pers_phy = Table(
+    "cor_monu_lieu_pers_phy",
+    db.metadata,
+    db.Column(
+        "monu_lieu_id",
+        ForeignKey("t_monuments_lieux.id_monument_lieu"),
+    ),
+    db.Column("pers_phy_id", ForeignKey("t_pers_physiques.id_pers_physique")),
+)
+
+
+cor_pers_phy_pers_mo = Table(
+    "cor_pers_phy_pers_mo",
+    db.metadata,
+    db.Column(
+        "pers_morale_id",
+        ForeignKey("t_pers_morales.id_pers_morale"),
+    ),
+    db.Column("pers_physique_id", ForeignKey("t_pers_physiques.id_pers_physique")),
+)
+
+
 class Media(db.Model):
     __tablename__ = "t_medias"
     id: Mapped[int] = mapped_column("id_media", primary_key=True)
@@ -334,24 +389,44 @@ class Region(db.Model):
     __tablename__ = "loc_regions"
     id: Mapped[int] = mapped_column("id_region", primary_key=True)
     name: Mapped[str] = mapped_column("nom_region")
-    id_pays: Mapped[int] = mapped_column()
+    id_pays: Mapped[int] = mapped_column(ForeignKey("loc_pays.id_pays"))
+    pays: Mapped[Pays] = relationship()
 
 
 class Departement(db.Model):
     __tablename__ = "loc_departements"
     id: Mapped[int] = mapped_column("id_departement", primary_key=True)
     name: Mapped[str] = mapped_column("nom_departement")
-    id_region: Mapped[int] = mapped_column()
+    id_region: Mapped[int] = mapped_column(ForeignKey("loc_regions.id_region"))
+    region: Mapped[Region] = relationship()
 
 
 class Commune(db.Model):
     __tablename__ = "loc_communes"
     id: Mapped[int] = mapped_column("id_commune", primary_key=True)
     name: Mapped[str] = mapped_column("nom_commune")
+    id_departement: Mapped[str] = mapped_column(
+        ForeignKey("loc_departements.id_departement")
+    )
+    departement: Mapped[Departement] = relationship()
 
 
-class CategorieSelect(MyCustomSelect):
+class CategorieSelect(Select):
     inherit_cache = True
+
+    def auto_joinload(self, model, fields=[]):
+        query_option = [raiseload("*")]
+        for f in fields:
+            if f in model.__mapper__.relationships:
+                query_option.append(joinedload(getattr(model, f)))
+        if "departement" in fields or "region" in fields:
+            self = self.options(
+                joinedload(model.commune)
+                .joinedload(Commune.departement)
+                .joinedload(Departement.region)
+            )
+        self = self.options(*tuple(query_option))
+        return self
 
     def where_publish(self):
         return self.filter_by(publie=True)
@@ -375,6 +450,21 @@ class CategorieSelect(MyCustomSelect):
         if "communes" in params:
             if hasattr(model, "id_commune"):
                 self = self.filter(model.id_commune.in_(params.getlist("communes")))
+        if "departements" in params:
+            departements = params.getlist("departements")
+            self = self.options(
+                joinedload(model.commune).joinedload(Commune.departement)
+            )
+            self = self.filter(Departement.id.in_(departements))
+        if "regions" in params:
+            regions = params.getlist("regions")
+            self = self.options(
+                joinedload(model.commune)
+                .joinedload(Commune.departement)
+                .joinedload(Departement.region)
+            )
+            self = self.filter(Region.id.in_(regions))
+
         if "etats_conservation" in params:
             if hasattr(model, "etat_conservation"):
                 etats_conservation = params.getlist("etats_conservation")
@@ -471,6 +561,12 @@ class MobilierImage(db.Model):
     siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_mob_img)
     pays: Mapped[List[Pays]] = relationship()
     commune: Mapped[List[Commune]] = relationship()
+    personnes_morales_liees: Mapped[List["PersonneMorale"]] = relationship(
+        secondary=cor_mob_img_pers_mo, back_populates="mobiliers_images_liees"
+    )
+    monuments_lieux_liees: Mapped[List["MonumentLieu"]] = relationship(
+        secondary=cor_monu_lieu_mob_img, back_populates="mobiliers_images_liees"
+    )
 
 
 class PersonneMorale(db.Model):
@@ -497,6 +593,18 @@ class PersonneMorale(db.Model):
     pays: Mapped[List[Pays]] = relationship()
     commune: Mapped[List[Commune]] = relationship()
 
+    personnes_physiques_liees: Mapped[List["PersonnePhysique"]] = relationship(
+        secondary=cor_pers_phy_pers_mo, back_populates="personnes_morales_liees"
+    )
+
+    monuments_lieux_liees: Mapped[List["MonumentLieu"]] = relationship(
+        secondary=cor_monu_lieu_pers_mo, back_populates="personnes_morales_liees"
+    )
+
+    mobiliers_images_liees: Mapped[List[MobilierImage]] = relationship(
+        secondary=cor_mob_img_pers_mo
+    )
+
 
 class PersonnePhysique(db.Model):
     __tablename__ = "t_pers_physiques"
@@ -522,6 +630,13 @@ class PersonnePhysique(db.Model):
     )
     periodes_historiques: Mapped[List[BibPerdiodesHisto]] = relationship(
         secondary=cor_periodes_historiques_pers_phy
+    )
+    personnes_morales_liees: Mapped[List[PersonneMorale]] = relationship(
+        secondary=cor_pers_phy_pers_mo, back_populates="personnes_physiques_liees"
+    )
+
+    monuments_lieux_liees: Mapped[List["MonumentLieu"]] = relationship(
+        secondary=cor_monu_lieu_pers_phy, back_populates="personnes_physiques_liees"
     )
 
     siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_pers_phy)
@@ -573,4 +688,14 @@ class MonumentLieu(db.Model):
 
     medias: Mapped[List[Media]] = relationship(
         secondary=cor_medias_monu_lieu, order_by=Media.id
+    )
+    mobiliers_images_liees: Mapped[List[MobilierImage]] = relationship(
+        secondary=cor_monu_lieu_mob_img
+    )
+
+    personnes_morales_liees: Mapped[List[PersonneMorale]] = relationship(
+        secondary=cor_monu_lieu_pers_mo, back_populates="monuments_lieux_liees"
+    )
+    personnes_physiques_liees: Mapped[List[PersonnePhysique]] = relationship(
+        secondary=cor_monu_lieu_pers_phy
     )

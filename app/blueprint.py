@@ -6,6 +6,7 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.exceptions import NotFound
 from sqlalchemy import func
 from PIL import Image, ImageOps
+from sqlalchemy.orm import joinedload
 
 
 routes = Blueprint("main", __name__)
@@ -225,7 +226,7 @@ def get_all_monuments_lieux():
 
 @routes.route("/monuments_lieux/<int:id>", methods=["GET"])
 def get_one_monument_lieu(id):
-    fields = [
+    joined_fields = [
         "etats_conservation",
         "auteurs",
         "contributeurs",
@@ -236,12 +237,36 @@ def get_one_monument_lieu(id):
         "siecles",
         "pays",
         "commune",
+        "region",
+        "departement",
     ]
-    q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).filter_by(id=id)
+    q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=joined_fields).filter_by(
+        id=id
+    )
+    q = q.options(
+        joinedload(MonumentLieu.mobiliers_images_liees).joinedload(MobilierImage.medias)
+    )
+    q = q.options(
+        joinedload(MonumentLieu.personnes_morales_liees).joinedload(
+            PersonneMorale.medias
+        )
+    )
+    q = q.options(
+        joinedload(MonumentLieu.personnes_physiques_liees).joinedload(
+            PersonnePhysique.medias
+        )
+    )
     monument_lieu = db.session.execute(q).unique().scalars().one_or_none()
     if not monument_lieu:
         raise NotFound()
-    return MonumentLieuSchema(only=fields).dump(monument_lieu)
+    schema_fields = joined_fields + [
+        "mobiliers_images_liees.medias",
+        "personnes_morales_liees.medias",
+        "personnes_physiques_liees.medias",
+    ]
+    schema_fields.remove("region")
+    schema_fields.remove("departement")
+    return MonumentLieuSchema(only=schema_fields).dump(monument_lieu)
 
 
 ##### MOBILIER IMAGE
@@ -268,7 +293,7 @@ def get_all_mobiliers_images():
 
 @routes.route("/mobiliers_images/<int:id>", methods=["GET"])
 def get_one_mobiliers_images(id):
-    fields = [
+    joined_fields = [
         "designations",
         "commune",
         "pays",
@@ -276,14 +301,30 @@ def get_one_mobiliers_images(id):
         "etats_conservation",
         "materiaux",
         "medias",
+        "region",
+        "departement",
     ]
-    q = MobilierImage.select.auto_joinload(MobilierImage, fields=fields).filter_by(
-        id=id
+    q = MobilierImage.select.auto_joinload(
+        MobilierImage, fields=joined_fields
+    ).filter_by(id=id)
+    q = q.options(
+        joinedload(MobilierImage.personnes_morales_liees).joinedload(
+            PersonneMorale.medias
+        )
+    )
+    q = q.options(
+        joinedload(MobilierImage.monuments_lieux_liees).joinedload(MonumentLieu.medias)
     )
     mobilier_image = db.session.execute(q).unique().scalars().one_or_none()
     if not mobilier_image:
         raise NotFound()
-    return MobilierImageSchema(only=fields).dump(mobilier_image)
+    schema_fields = joined_fields + [
+        "personnes_morales_liees.medias",
+        "monuments_lieux_liees.medias",
+    ]
+    schema_fields.remove("region")
+    schema_fields.remove("departement")
+    return MobilierImageSchema(only=schema_fields).dump(mobilier_image)
 
 
 ## Personnes morales
@@ -309,14 +350,43 @@ def get_all_personnes_morales():
 
 @routes.route("/personnes_morales/<int:id>", methods=["GET"])
 def get_one_personne_morale(id):
-    fields = ["natures", "pays", "commune", "siecles", "medias"]
-    q = PersonneMorale.select.auto_joinload(PersonneMorale, fields=fields).filter_by(
+    joined_fields = [
+        "natures",
+        "pays",
+        "commune",
+        "siecles",
+        "medias",
+        "region",
+        "departement",
+    ]
+
+    q = PersonneMorale.select.auto_joinload(PersonneMorale, joined_fields).filter_by(
         id=id
     )
+    q = q.options(
+        joinedload(PersonneMorale.personnes_physiques_liees).joinedload(
+            PersonnePhysique.medias
+        )
+    )
+    q = q.options(
+        joinedload(PersonneMorale.mobiliers_images_liees).joinedload(
+            MobilierImage.medias
+        )
+    )
+    q = q.options(
+        joinedload(PersonneMorale.monuments_lieux_liees).joinedload(MonumentLieu.medias)
+    )
+    schema_fields = joined_fields + [
+        "personnes_physiques_liees.medias",
+        "mobiliers_images_liees.medias",
+        "monuments_lieux_liees.medias",
+    ]
+    schema_fields.remove("region")
+    schema_fields.remove("departement")
     persone_morale = db.session.execute(q).unique().scalars().one_or_none()
     if not persone_morale:
         raise NotFound()
-    return PersonneMoraleSchema(only=fields).dump(persone_morale)
+    return PersonneMoraleSchema(only=schema_fields).dump(persone_morale)
 
 
 @routes.route("/personnes_physiques", methods=["GET", "POST"])
@@ -339,18 +409,36 @@ def get_all_personnes_physiques():
 
 @routes.route("/personnes_physiques/<int:id>", methods=["GET"])
 def get_one_personne_physique(id):
-    fields = [
+    joined_fields = [
         "medias",
         "siecles",
         "pays",
         "commune",
         "modes_deplacements",
         "periodes_historiques",
+        "region",
+        "departement",
     ]
     q = PersonnePhysique.select.auto_joinload(
-        PersonnePhysique, fields=fields
+        PersonnePhysique, fields=joined_fields
     ).filter_by(id=id)
+    q = q.options(
+        joinedload(PersonnePhysique.personnes_morales_liees).joinedload(
+            PersonneMorale.medias
+        )
+    )
+    q = q.options(
+        joinedload(PersonnePhysique.monuments_lieux_liees).joinedload(
+            MonumentLieu.medias
+        )
+    )
     persone_physique = db.session.execute(q).unique().scalars().one_or_none()
     if not persone_physique:
         raise NotFound()
-    return PersonnePhysiqueSchema(only=fields).dump(persone_physique)
+    schema_fields = joined_fields + [
+        "personnes_morales_liees.medias",
+        "monuments_lieux_liees.medias",
+    ]
+    schema_fields.remove("region")
+    schema_fields.remove("departement")
+    return PersonnePhysiqueSchema(only=schema_fields).dump(persone_physique)
