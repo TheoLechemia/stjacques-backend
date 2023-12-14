@@ -303,6 +303,9 @@ def get_one_mobiliers_images(id):
         "medias",
         "region",
         "departement",
+        "contributeurs",
+        "auteurs",
+        "redacteurs",
     ]
     q = MobilierImage.select.auto_joinload(
         MobilierImage, fields=joined_fields
@@ -358,6 +361,8 @@ def get_one_personne_morale(id):
         "medias",
         "region",
         "departement",
+        "contributeurs",
+        "redacteurs",
     ]
 
     q = PersonneMorale.select.auto_joinload(PersonneMorale, joined_fields).filter_by(
@@ -418,6 +423,8 @@ def get_one_personne_physique(id):
         "periodes_historiques",
         "region",
         "departement",
+        "contributeurs",
+        "redacteurs",
     ]
     q = PersonnePhysique.select.auto_joinload(
         PersonnePhysique, fields=joined_fields

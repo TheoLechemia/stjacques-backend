@@ -259,6 +259,9 @@ class MobilierImageSchema(
     materiaux = Nested(BibMateriauxSchema, many=True)
     personnes_morales_liees = Nested("PersonneMoraleSchema", many=True)
     monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
+    auteurs = Nested(BibSourceAuteurSchema, many=True)
+    contributeurs = Nested(BibContributeur, many=True)
+    redacteurs = Nested(BibRedacteurSchema, many=True)
 
     categorie = fields.Constant("Mobilier & Images")
     meta_categorie = fields.Constant("mobiliers_images")
@@ -276,6 +279,8 @@ class PersonneMoraleSchema(
     natures = Nested(BibNaturesPersonnesMoralesFlattendSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchema)
+    contributeurs = Nested(BibContributeur, many=True)
+    redacteurs = Nested(BibRedacteurSchema, many=True)
 
     mobiliers_images_liees = Nested("MobilierImageSchema", many=True)
     personnes_physiques_liees = Nested("PersonnePhysiqueSchema", many=True)
@@ -301,6 +306,8 @@ class PersonnePhysiqueSchema(
     commune = Nested(CommuneSchemaFlatten)
     personnes_morales_liees = Nested(PersonneMoraleSchema, many=True)
     monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
+    contributeurs = Nested(BibContributeur, many=True)
+    redacteurs = Nested(BibRedacteurSchema, many=True)
 
     categorie = fields.Constant("Personnes physiques")
     meta_categorie = fields.Constant("personnes_physiques")
