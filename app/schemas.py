@@ -206,10 +206,10 @@ class FlatteLocaliteMixin:
                 .get("region")
                 .get("name", "")
             )
-            # data["_commune"] = data.get("commune", {}).get("name")
-            # data["commune"] = data.pop("_commune")
-            # data["commune"] = data.pop("_commune")
-            # data["region"] = data.pop("_region")
+            data["_commune"] = data.get("commune", {}).get("name")
+            data["commune"] = data.pop("_commune")
+            data["departement"] = data.pop("_departement")
+            data["region"] = data.pop("_region")
         return data
 
 
@@ -225,9 +225,7 @@ class MonumentLieuSchema(
     etats_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
     auteurs = Nested(BibSourceAuteurSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
-    commune = Nested(CommuneSchemaFlatten)
-    departement = Nested(DepartementFlattenSchema)
-    region = Nested(RegionFlattenSchema)
+    commune = Nested(CommuneSchema)
     contributeurs = Nested(BibContributeur, many=True)
     redacteurs = Nested(BibRedacteurSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
@@ -251,7 +249,7 @@ class MobilierImageSchema(
     medias = Nested(MediaSchema, many=True)
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
-    commune = Nested(CommuneSchemaFlatten)
+    commune = Nested(CommuneSchema)
     departement = Nested(DepartementFlattenSchema)
     region = Nested(RegionFlattenSchema)
     designations = Nested(BibDesignationMobImgSchemaFlatten, many=True)
@@ -303,7 +301,7 @@ class PersonnePhysiqueSchema(
 
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
-    commune = Nested(CommuneSchemaFlatten)
+    commune = Nested(CommuneSchema)
     personnes_morales_liees = Nested(PersonneMoraleSchema, many=True)
     monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
     contributeurs = Nested(BibContributeur, many=True)

@@ -215,7 +215,7 @@ def get_all_monuments_lieux():
         fields = fields.split(",")
 
     q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).auto_filters(
-        params, MonumentLieu, False
+        params, MonumentLieu
     )
 
     monuments_lieux = db.session.execute(q).unique().scalars()
@@ -226,7 +226,7 @@ def get_all_monuments_lieux():
 
 @routes.route("/monuments_lieux/<int:id>", methods=["GET"])
 def get_one_monument_lieu(id):
-    joined_fields = [
+    fields = [
         "etats_conservation",
         "auteurs",
         "contributeurs",
@@ -237,36 +237,15 @@ def get_one_monument_lieu(id):
         "siecles",
         "pays",
         "commune",
-        "region",
-        "departement",
-    ]
-    q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=joined_fields).filter_by(
-        id=id
-    )
-    q = q.options(
-        joinedload(MonumentLieu.mobiliers_images_liees).joinedload(MobilierImage.medias)
-    )
-    q = q.options(
-        joinedload(MonumentLieu.personnes_morales_liees).joinedload(
-            PersonneMorale.medias
-        )
-    )
-    q = q.options(
-        joinedload(MonumentLieu.personnes_physiques_liees).joinedload(
-            PersonnePhysique.medias
-        )
-    )
-    monument_lieu = db.session.execute(q).unique().scalars().one_or_none()
-    if not monument_lieu:
-        raise NotFound()
-    schema_fields = joined_fields + [
         "mobiliers_images_liees.medias",
         "personnes_morales_liees.medias",
         "personnes_physiques_liees.medias",
     ]
-    schema_fields.remove("region")
-    schema_fields.remove("departement")
-    return MonumentLieuSchema(only=schema_fields).dump(monument_lieu)
+    q = MonumentLieu.select.filter_by(id=id)
+    monument_lieu = db.session.execute(q).unique().scalars().one_or_none()
+    if not monument_lieu:
+        raise NotFound()
+    return MonumentLieuSchema(only=fields).dump(monument_lieu)
 
 
 ##### MOBILIER IMAGE
@@ -293,7 +272,7 @@ def get_all_mobiliers_images():
 
 @routes.route("/mobiliers_images/<int:id>", methods=["GET"])
 def get_one_mobiliers_images(id):
-    joined_fields = [
+    fields = [
         "designations",
         "commune",
         "pays",
@@ -301,33 +280,17 @@ def get_one_mobiliers_images(id):
         "etats_conservation",
         "materiaux",
         "medias",
-        "region",
-        "departement",
         "contributeurs",
         "auteurs",
         "redacteurs",
-    ]
-    q = MobilierImage.select.auto_joinload(
-        MobilierImage, fields=joined_fields
-    ).filter_by(id=id)
-    q = q.options(
-        joinedload(MobilierImage.personnes_morales_liees).joinedload(
-            PersonneMorale.medias
-        )
-    )
-    q = q.options(
-        joinedload(MobilierImage.monuments_lieux_liees).joinedload(MonumentLieu.medias)
-    )
-    mobilier_image = db.session.execute(q).unique().scalars().one_or_none()
-    if not mobilier_image:
-        raise NotFound()
-    schema_fields = joined_fields + [
         "personnes_morales_liees.medias",
         "monuments_lieux_liees.medias",
     ]
-    schema_fields.remove("region")
-    schema_fields.remove("departement")
-    return MobilierImageSchema(only=schema_fields).dump(mobilier_image)
+    q = MobilierImage.select.filter_by(id=id)
+    mobilier_image = db.session.execute(q).unique().scalars().one_or_none()
+    if not mobilier_image:
+        raise NotFound()
+    return MobilierImageSchema(only=fields).dump(mobilier_image)
 
 
 ## Personnes morales
@@ -344,7 +307,7 @@ def get_all_personnes_morales():
         fields = fields.split(",")
 
     q = PersonneMorale.select.auto_joinload(PersonneMorale, fields=fields).auto_filters(
-        params, PersonneMorale, False
+        params, PersonneMorale
     )
 
     personnes_morales = db.session.execute(q).unique().scalars()
@@ -353,7 +316,7 @@ def get_all_personnes_morales():
 
 @routes.route("/personnes_morales/<int:id>", methods=["GET"])
 def get_one_personne_morale(id):
-    joined_fields = [
+    fields = [
         "natures",
         "pays",
         "commune",
@@ -363,35 +326,17 @@ def get_one_personne_morale(id):
         "departement",
         "contributeurs",
         "redacteurs",
-    ]
-
-    q = PersonneMorale.select.auto_joinload(PersonneMorale, joined_fields).filter_by(
-        id=id
-    )
-    q = q.options(
-        joinedload(PersonneMorale.personnes_physiques_liees).joinedload(
-            PersonnePhysique.medias
-        )
-    )
-    q = q.options(
-        joinedload(PersonneMorale.mobiliers_images_liees).joinedload(
-            MobilierImage.medias
-        )
-    )
-    q = q.options(
-        joinedload(PersonneMorale.monuments_lieux_liees).joinedload(MonumentLieu.medias)
-    )
-    schema_fields = joined_fields + [
         "personnes_physiques_liees.medias",
         "mobiliers_images_liees.medias",
         "monuments_lieux_liees.medias",
     ]
-    schema_fields.remove("region")
-    schema_fields.remove("departement")
+
+    q = PersonneMorale.select.filter_by(id=id)
+
     persone_morale = db.session.execute(q).unique().scalars().one_or_none()
     if not persone_morale:
         raise NotFound()
-    return PersonneMoraleSchema(only=schema_fields).dump(persone_morale)
+    return PersonneMoraleSchema(only=fields).dump(persone_morale)
 
 
 @routes.route("/personnes_physiques", methods=["GET", "POST"])
@@ -406,7 +351,7 @@ def get_all_personnes_physiques():
 
     q = PersonnePhysique.select.auto_joinload(
         PersonnePhysique, fields=fields
-    ).auto_filters(params, PersonnePhysique, False)
+    ).auto_filters(params, PersonnePhysique)
 
     personnes_physiques = db.session.execute(q).unique().scalars()
     return PersonnePhysiqueSchema(only=fields).dump(personnes_physiques, many=True)
@@ -414,38 +359,20 @@ def get_all_personnes_physiques():
 
 @routes.route("/personnes_physiques/<int:id>", methods=["GET"])
 def get_one_personne_physique(id):
-    joined_fields = [
+    fields = [
         "medias",
         "siecles",
         "pays",
         "commune",
         "modes_deplacements",
         "periodes_historiques",
-        "region",
-        "departement",
         "contributeurs",
         "redacteurs",
-    ]
-    q = PersonnePhysique.select.auto_joinload(
-        PersonnePhysique, fields=joined_fields
-    ).filter_by(id=id)
-    q = q.options(
-        joinedload(PersonnePhysique.personnes_morales_liees).joinedload(
-            PersonneMorale.medias
-        )
-    )
-    q = q.options(
-        joinedload(PersonnePhysique.monuments_lieux_liees).joinedload(
-            MonumentLieu.medias
-        )
-    )
-    persone_physique = db.session.execute(q).unique().scalars().one_or_none()
-    if not persone_physique:
-        raise NotFound()
-    schema_fields = joined_fields + [
         "personnes_morales_liees.medias",
         "monuments_lieux_liees.medias",
     ]
-    schema_fields.remove("region")
-    schema_fields.remove("departement")
-    return PersonnePhysiqueSchema(only=schema_fields).dump(persone_physique)
+    q = PersonnePhysique.select.filter_by(id=id)
+    persone_physique = db.session.execute(q).unique().scalars().one_or_none()
+    if not persone_physique:
+        raise NotFound()
+    return PersonnePhysiqueSchema(only=fields).dump(persone_physique)
