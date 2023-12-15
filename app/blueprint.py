@@ -322,8 +322,6 @@ def get_one_personne_morale(id):
         "commune",
         "siecles",
         "medias",
-        "region",
-        "departement",
         "contributeurs",
         "redacteurs",
         "personnes_physiques_liees.medias",
