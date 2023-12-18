@@ -498,13 +498,14 @@ class CategorieSelect(Select):
         self = self.options(*tuple(query_option))
         return self
 
-    def where_publish(self):
-        return self.filter_by(publie=True)
-
     def where_has_media(self, model):
         return self.filter(model.medias.any())
 
     def auto_filters(self, params, model, remove_publish=True):
+        """
+        BECAUSE OF manuel join, we CANNOT use .filter_by option
+        """
+        join_on_geo = False
         if "has_medias" in params and params["has_medias"] == "true":
             params.pop("has_medias")
             self = self.filter(model.medias.any())
@@ -522,17 +523,16 @@ class CategorieSelect(Select):
                 self = self.filter(model.id_commune.in_(params.getlist("communes")))
         if "departements" in params:
             departements = params.getlist("departements")
-            self = self.options(
-                joinedload(model.commune).joinedload(Commune.departement)
-            )
+            self = self.join(Commune).join(Departement)
+
             self = self.filter(Departement.id.in_(departements))
+            join_on_geo = True
         if "regions" in params:
             regions = params.getlist("regions")
-            self = self.options(
-                joinedload(model.commune)
-                .joinedload(Commune.departement)
-                .joinedload(Departement.region)
-            )
+            if join_on_geo:
+                self = self.join(Region)
+            else:
+                self = self.join(Commune).join(Departement).join(Region)
             self = self.filter(Region.id.in_(regions))
 
         if "etats_conservation" in params:
@@ -588,7 +588,7 @@ class CategorieSelect(Select):
 
         # force publish
         if remove_publish:
-            self = self.where_publish()
+            self = self.filter(model.publie == True)
         return self
 
 
@@ -608,12 +608,8 @@ class MobilierImage(db.Model):
     id_pays: Mapped[int] = mapped_column(ForeignKey("loc_pays.id_pays"))
     id_commune: Mapped[int] = mapped_column(ForeignKey("loc_communes.id_commune"))
 
-    medias: Mapped[List[Media]] = relationship(
-        secondary=cor_medias_mob_img, order_by=Media.id
-    )
-    medias: Mapped[List[Media]] = relationship(
-        secondary=cor_medias_mob_img, order_by=Media.id
-    )
+    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_mob_img)
+
     etats_conservation: Mapped[List[BibEtatConservation]] = relationship(
         secondary=cor_etat_cons_mob_img
     )
@@ -661,9 +657,7 @@ class PersonneMorale(db.Model):
     id_pays: Mapped[int] = mapped_column(ForeignKey("loc_pays.id_pays"))
     id_commune: Mapped[int] = mapped_column(ForeignKey("loc_communes.id_commune"))
 
-    medias: Mapped[List[Media]] = relationship(
-        secondary=cor_medias_pers_mo, order_by=Media.id
-    )
+    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_pers_mo)
     natures: Mapped[List[BibNaturesPersonnesMorales]] = relationship(
         secondary=cor_natures_pers_mo
     )
@@ -705,9 +699,7 @@ class PersonnePhysique(db.Model):
     id_pays: Mapped[int] = mapped_column(ForeignKey("loc_pays.id_pays"))
     id_commune: Mapped[int] = mapped_column(ForeignKey("loc_communes.id_commune"))
 
-    medias: Mapped[List[Media]] = relationship(
-        secondary=cor_medias_pers_phy, order_by=Media.id
-    )
+    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_pers_phy)
     modes_deplacements: Mapped[List[BibDeplacements]] = relationship(
         secondary=cor_modes_deplacements_pers_phy
     )
@@ -779,9 +771,7 @@ class MonumentLieu(db.Model):
         secondary=cor_materiaux_monu_lieu
     )
 
-    medias: Mapped[List[Media]] = relationship(
-        secondary=cor_medias_monu_lieu, order_by=Media.id
-    )
+    medias: Mapped[List[Media]] = relationship(secondary=cor_medias_monu_lieu)
     mobiliers_images_liees: Mapped[List[MobilierImage]] = relationship(
         secondary=cor_monu_lieu_mob_img
     )
