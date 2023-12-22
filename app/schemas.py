@@ -108,6 +108,11 @@ class BibProfessionSchema(ma.SQLAlchemyAutoSchema):
         model = BibProfessions
 
 
+class BibProfessionNestedSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = BibProfessions
+
+
 class BibMonuLieuNatureFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
         model = BibMonuLieuNature
@@ -300,6 +305,7 @@ class PersonnePhysiqueSchema(
     periodes_historiques = Nested(BibPerdiodesHistoFlattenSchema, many=True)
 
     siecles = Nested(BibSiecleFlattenSchema, many=True)
+    professions = Nested(BibProfessionNestedSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchema)
     personnes_morales_liees = Nested(PersonneMoraleSchema, many=True)

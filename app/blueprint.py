@@ -209,17 +209,14 @@ def get_all_monuments_lieux():
         json_data = request.get_json()
         params.update(json_data)
 
-    fields = params.pop("fields", default=[])
-
-    if fields:
-        fields = fields.split(",")
+    fields = params.getlist("fields")
+    params.pop("fields", [])
 
     q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).auto_filters(
         params, MonumentLieu
     )
 
     monuments_lieux = db.session.execute(q).unique().scalars()
-    # TODO : paginate ?
 
     return MonumentLieuSchema(only=fields).dump(monuments_lieux, many=True)
 
@@ -258,9 +255,8 @@ def get_all_mobiliers_images():
         json_data = request.get_json()
         params.update(json_data)
 
-    fields = params.pop("fields", default=[])
-    if fields:
-        fields = fields.split(",")
+    fields = params.getlist("fields")
+    params.pop("fields", [])
 
     q = MobilierImage.select.auto_joinload(MobilierImage, fields=fields).auto_filters(
         params, MobilierImage
@@ -302,9 +298,8 @@ def get_all_personnes_morales():
     if request.method == "POST" and request.is_json:
         json_data = request.get_json()
         params.update(json_data)
-    fields = params.pop("fields", default=[])
-    if fields:
-        fields = fields.split(",")
+    fields = params.getlist("fields")
+    params.pop("fields", [])
 
     q = PersonneMorale.select.auto_joinload(PersonneMorale, fields=fields).auto_filters(
         params, PersonneMorale
@@ -343,9 +338,8 @@ def get_all_personnes_physiques():
     if request.method == "POST" and request.is_json:
         json_data = request.get_json()
         params.update(json_data)
-    fields = params.pop("fields", default=[])
-    if fields:
-        fields = fields.split(",")
+    fields = params.getlist("fields")
+    params.pop("fields", [])
 
     q = PersonnePhysique.select.auto_joinload(
         PersonnePhysique, fields=fields
@@ -364,6 +358,7 @@ def get_one_personne_physique(id):
         "commune",
         "modes_deplacements",
         "periodes_historiques",
+        "professions",
         "contributeurs",
         "redacteurs",
         "personnes_morales_liees.medias",
