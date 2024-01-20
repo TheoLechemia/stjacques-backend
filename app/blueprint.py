@@ -73,12 +73,14 @@ def media():
                 os.makedirs(thum_path.parent)
             image = Image.open(file)
 
-            # resize_img = ImageOps.fit(image, (size[1], size[0]), Image.ANTIALIAS)
             resize_img = image.copy()
-            resize_img = ImageOps.fit(image, (size[1], size[0]), Image.ANTIALIAS)
+            if resize_img.width <= resize_img.height:
+                resize_img = ImageOps.pad(resize_img, (size[1], size[0]))
+            else:
+                resize_img.thumbnail((size[1], size[0]))
 
-            resize_img.save(thum_path)
-            return send_file(thum_path)
+        resize_img.save(thum_path)
+        return send_file(thum_path)
 
     return send_file(file)
 
