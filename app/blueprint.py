@@ -88,7 +88,7 @@ def media():
 @routes.route("/pays", methods=["GET"])
 def get_all_countries():
     return PaysSchema().dump(
-        db.session.execute(Pays.select.where(Pays.name =='France').order_by(Pays.name)).scalars(), many=True
+        db.session.execute(Pays.select.order_by(Pays.name)).scalars(), many=True
     )
 
 
