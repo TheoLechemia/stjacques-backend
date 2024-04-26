@@ -231,6 +231,8 @@ class MonumentLieuSchema(
 
     description = MardownField()
     histoire = MardownField()
+    bibliographie = MardownField()
+    
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     natures = Nested(BibMonuLieuNatureFlattenSchema, many=True)
     etats_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
@@ -259,6 +261,7 @@ class MobilierImageSchema(
 
     description = MardownField()
     histoire = MardownField()
+    bibliographie = MardownField()
 
     medias = Nested(MediaSchema, many=True)
     siecles = Nested(BibSiecleFlattenSchema, many=True)
@@ -286,6 +289,8 @@ class PersonneMoraleSchema(
         model = PersonneMorale
         include_fk = True
 
+    bibliographie = MardownField()
+
     medias = Nested(MediaSchema, many=True)
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     natures = Nested(BibNaturesPersonnesMoralesFlattendSchema, many=True)
@@ -308,6 +313,8 @@ class PersonnePhysiqueSchema(
     class Meta:
         model = PersonnePhysique
         include_fk = True
+        
+    bibliographie = MardownField()
 
     medias = Nested(MediaSchema, many=True)
     modes_deplacements = Nested(BibDeplacementsFlattenSchema, many=True)
