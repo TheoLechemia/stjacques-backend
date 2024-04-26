@@ -3,7 +3,7 @@ from marshmallow.decorators import post_dump
 from marshmallow.exceptions import ValidationError
 from marshmallow_sqlalchemy import auto_field
 from marshmallow_sqlalchemy.fields import Nested
-
+from markdown import markdown
 
 from utils_flask_sqla.schema import SmartRelationshipsMixin
 
@@ -42,6 +42,10 @@ class FlattenMixin:
     def flat(self, data, **kw):
         return data[self.__flatten_key__]
 
+
+class MardownField(fields.Field):
+    def _serialize(self, value, attr, obj, **kwargs):
+        return markdown(value)
 
 class BibSiecleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -225,6 +229,8 @@ class MonumentLieuSchema(
         model = MonumentLieu
         include_fk = True
 
+    description = MardownField()
+    histoire = MardownField()
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     natures = Nested(BibMonuLieuNatureFlattenSchema, many=True)
     etats_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
@@ -250,6 +256,9 @@ class MobilierImageSchema(
     class Meta:
         model = MobilierImage
         include_fk = True
+
+    description = MardownField()
+    histoire = MardownField()
 
     medias = Nested(MediaSchema, many=True)
     siecles = Nested(BibSiecleFlattenSchema, many=True)
