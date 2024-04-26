@@ -45,7 +45,10 @@ class FlattenMixin:
 
 class MardownField(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
-        return markdown(value)
+        if value:
+            return markdown(value)
+        else:
+            return ""
 
 class BibSiecleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -232,6 +235,8 @@ class MonumentLieuSchema(
     description = MardownField()
     histoire = MardownField()
     bibliographie = MardownField()
+    geolocalisation = MardownField()
+    source = MardownField()
     
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     natures = Nested(BibMonuLieuNatureFlattenSchema, many=True)
@@ -262,6 +267,7 @@ class MobilierImageSchema(
     description = MardownField()
     histoire = MardownField()
     bibliographie = MardownField()
+    source = MardownField()
 
     medias = Nested(MediaSchema, many=True)
     siecles = Nested(BibSiecleFlattenSchema, many=True)
@@ -290,6 +296,8 @@ class PersonneMoraleSchema(
         include_fk = True
 
     bibliographie = MardownField()
+    source = MardownField()
+
 
     medias = Nested(MediaSchema, many=True)
     siecles = Nested(BibSiecleFlattenSchema, many=True)
@@ -313,8 +321,9 @@ class PersonnePhysiqueSchema(
     class Meta:
         model = PersonnePhysique
         include_fk = True
-        
+
     bibliographie = MardownField()
+    source = MardownField()
 
     medias = Nested(MediaSchema, many=True)
     modes_deplacements = Nested(BibDeplacementsFlattenSchema, many=True)
