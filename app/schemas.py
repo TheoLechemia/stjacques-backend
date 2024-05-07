@@ -288,6 +288,13 @@ class MobilierImageSchema(
     meta_categorie = fields.Constant("mobiliers_images")
 
 
+class TranslateBoolField(fields.Field):
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value:
+            return "Oui"
+        else:
+            return "Non"
+
 class PersonneMoraleSchema(
     SmartRelationshipsMixin, FlatteLocaliteMixin, ma.SQLAlchemyAutoSchema
 ):
@@ -297,7 +304,7 @@ class PersonneMoraleSchema(
 
     bibliographie = MardownField()
     source = MardownField()
-
+    acte_fondation = TranslateBoolField()
 
     medias = Nested(MediaSchema, many=True)
     siecles = Nested(BibSiecleFlattenSchema, many=True)
