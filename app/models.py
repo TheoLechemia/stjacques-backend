@@ -652,6 +652,7 @@ class PersonneMorale(db.Model):
     source: Mapped[str] = mapped_column("sources")
     historique: Mapped[str] = mapped_column("historique")
     statuts: Mapped[str] = mapped_column("statuts")
+    texte_statuts: Mapped[str] = mapped_column("texte_statuts")
     commentaires: Mapped[str] = mapped_column("commentaires")
     acte_fondation: Mapped[bool] = mapped_column("acte_fondation")
     bibliographie: Mapped[str] = mapped_column()
