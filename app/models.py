@@ -602,7 +602,10 @@ class MobilierImage(db.Model):
     histoire: Mapped[str] = mapped_column("historique")
     source: Mapped[str] = mapped_column("source")
     bibliographie: Mapped[str] = mapped_column()
+    lieu_conservation: Mapped[str] = mapped_column()
+    lieu_origine: Mapped[str] = mapped_column()
     date_creation: Mapped[str] = mapped_column()
+    protection_commentaires: Mapped[str] = mapped_column()
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
     id_pays: Mapped[int] = mapped_column(ForeignKey("loc_pays.id_pays"))
@@ -654,7 +657,7 @@ class PersonneMorale(db.Model):
     statuts: Mapped[str] = mapped_column("statuts")
     texte_statuts: Mapped[str] = mapped_column("texte_statuts")
     commentaires: Mapped[str] = mapped_column("commentaires")
-    acte_fondation: Mapped[bool] = mapped_column("acte_fondation")
+    acte_fondation: Mapped[bool] = mapped_column("acte_fondation")    
     bibliographie: Mapped[str] = mapped_column()
     date_creation: Mapped[str] = mapped_column()
     date_maj: Mapped[str] = mapped_column()
@@ -749,6 +752,7 @@ class MonumentLieu(db.Model):
     source: Mapped[str]
     protection: Mapped[str] = mapped_column()
     bibliographie: Mapped[str] = mapped_column()
+    protection_commentaires: Mapped[str] = mapped_column()
     geolocalisation: Mapped[str]
     date_creation: Mapped[str] = mapped_column()
     date_maj: Mapped[str] = mapped_column()
