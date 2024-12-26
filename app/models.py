@@ -72,23 +72,23 @@ cor_materiaux_mob_img = Table(
 )
 
 
-cor_contributeurs_mob_img = Table(
-    "cor_contributeurs_mob_img",
-    db.metadata,
-    db.Column(
-        "contributeur_mob_img_id", ForeignKey("bib_contributeur.id_contributeur")
-    ),
-    db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
-)
+# cor_contributeurs_mob_img = Table(
+#     "cor_contributeurs_mob_img",
+#     db.metadata,
+#     db.Column(
+#         "contributeur_mob_img_id", ForeignKey("bib_contributeur.id_contributeur")
+#     ),
+#     db.Column("mobilier_image_id", ForeignKey("t_mobiliers_images.id_mobilier_image")),
+# )
 
-cor_natures_monu_lieu = Table(
-    "cor_natures_monu_lieu",
-    db.metadata,
-    db.Column(
-        "monu_lieu_nature_id", ForeignKey("bib_monu_lieu_natures.id_monu_lieu_nature")
-    ),
-    db.Column("monument_lieu_id", ForeignKey("t_monuments_lieux.id_monument_lieu")),
-)
+# cor_natures_monu_lieu = Table(
+#     "cor_natures_monu_lieu",
+#     db.metadata,
+#     db.Column(
+#         "monu_lieu_nature_id", ForeignKey("bib_monu_lieu_natures.id_monu_lieu_nature")
+#     ),
+#     db.Column("monument_lieu_id", ForeignKey("t_monuments_lieux.id_monument_lieu")),
+# )
 
 cor_etat_cons_mob_img = Table(
     "cor_etat_cons_mob_img",
@@ -383,10 +383,10 @@ class BibDesignationMobImg(db.Model):
     name: Mapped[str] = mapped_column("designation_type")
 
 
-class BibContributeur(db.Model):
-    __tablename__ = "bib_contributeur"
-    id: Mapped[int] = mapped_column("id_contributeur", primary_key=True)
-    name: Mapped[str] = mapped_column("contributeur_nom")
+# class BibContributeur(db.Model):
+#     __tablename__ = "bib_contributeur"
+#     id: Mapped[int] = mapped_column("id_contributeur", primary_key=True)
+#     name: Mapped[str] = mapped_column("contributeur_nom")
 
 
 class BibSiecle(db.Model):
@@ -395,10 +395,10 @@ class BibSiecle(db.Model):
     name: Mapped[str] = mapped_column("siecle_list")
 
 
-class BibMonuLieuNature(db.Model):
-    __tablename__ = "bib_monu_lieu_natures"
-    id: Mapped[int] = mapped_column("id_monu_lieu_nature", primary_key=True)
-    name: Mapped[str] = mapped_column("monu_lieu_nature_type")
+# class BibMonuLieuNature(db.Model):
+#     __tablename__ = "bib_monu_lieu_natures"
+#     id: Mapped[int] = mapped_column("id_monu_lieu_nature", primary_key=True)
+#     name: Mapped[str] = mapped_column("monu_lieu_nature_type")
 
 
 class BibEtatConservation(db.Model):
@@ -568,12 +568,12 @@ class CategorieSelect(Select):
                 self = self.filter(
                     model.professions.any(BibProfessions.id.in_(professions))
                 )
-        if "designations" in params:
-            if hasattr(model, "designations"):
-                designations = params.getlist("designations")
-                self = self.filter(
-                    model.designations.any(BibDesignationMobImg.id.in_(designations))
-                )
+        # if "designations" in params:
+        #     if hasattr(model, "designations"):
+        #         designations = params.getlist("designations")
+        #         self = self.filter(
+        #             model.designations.any(BibDesignationMobImg.id.in_(designations))
+        #         )
         if "techniques" in params:
             if hasattr(model, "techniques"):
                 techniques = params.getlist("techniques")
@@ -604,7 +604,7 @@ class MobilierImage(db.Model):
     bibliographie: Mapped[str] = mapped_column()
     lieu_conservation: Mapped[str] = mapped_column()
     lieu_origine: Mapped[str] = mapped_column()
-    date_creation: Mapped[str] = mapped_column()
+    date_creation: Mapped[str] = mapped_column("date_cr_ation")
     protection_commentaires: Mapped[str] = mapped_column()
     date_maj: Mapped[str] = mapped_column()
     publie: Mapped[bool] = mapped_column()
@@ -616,9 +616,9 @@ class MobilierImage(db.Model):
     etats_conservation: Mapped[List[BibEtatConservation]] = relationship(
         secondary=cor_etat_cons_mob_img
     )
-    designations: Mapped[List[BibDesignationMobImg]] = relationship(
-        secondary=cor_designations_mob_img
-    )
+    # designations: Mapped[List[BibDesignationMobImg]] = relationship(
+    #     secondary=cor_designations_mob_img
+    # )
     techniques: Mapped[List[BibTechniquesMob]] = relationship(
         secondary=cor_techniques_mob_img
     )
@@ -628,12 +628,14 @@ class MobilierImage(db.Model):
     auteurs: Mapped[List[BibSourceAuteur]] = relationship(
         secondary=cor_source_auteur_mob_img
     )
-    contributeurs: Mapped[List[BibContributeur]] = relationship(
-        secondary=cor_contributeurs_mob_img
-    )
-    redacteurs: Mapped[List[BibRedacteur]] = relationship(
-        secondary=cor_redacteurs_mob_img
-    )
+    # contributeurs: Mapped[List[BibContributeur]] = relationship(
+    #     secondary=cor_contributeurs_mob_img
+    # )
+    contributeurs: Mapped[str] = mapped_column()
+
+    # redacteurs: Mapped[List[BibRedacteur]] = relationship(
+    #     secondary=cor_redacteurs_mob_img
+    # )
 
     siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_mob_img)
     pays: Mapped[List[Pays]] = relationship()
@@ -669,12 +671,10 @@ class PersonneMorale(db.Model):
     natures: Mapped[List[BibNaturesPersonnesMorales]] = relationship(
         secondary=cor_natures_pers_mo
     )
-    contributeurs: Mapped[List[BibContributeur]] = relationship(
-        secondary=cor_contributeurs_pers_mo
-    )
-    redacteurs: Mapped[List[BibRedacteur]] = relationship(
-        secondary=cor_redacteurs_pers_mo
-    )
+    contributeurs: Mapped[str] = mapped_column()
+    # redacteurs: Mapped[List[BibRedacteur]] = relationship(
+    #     secondary=cor_redacteurs_pers_mo
+    # )
 
     siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_pers_mo)
     pays: Mapped[List[Pays]] = relationship()
@@ -719,12 +719,10 @@ class PersonnePhysique(db.Model):
     professions: Mapped[List[BibProfessions]] = relationship(
         secondary=cor_professions_pers_phy
     )
-    contributeurs: Mapped[List[BibContributeur]] = relationship(
-        secondary=cor_contributeurs_pers_phy
-    )
-    redacteurs: Mapped[List[BibRedacteur]] = relationship(
-        secondary=cor_redacteurs_pers_phy
-    )
+    contributeurs: Mapped[str] = mapped_column()
+    # redacteurs: Mapped[List[BibRedacteur]] = relationship(
+    #     secondary=cor_redacteurs_pers_phy
+    # )
     periodes_historiques: Mapped[List[BibPerdiodesHisto]] = relationship(
         secondary=cor_periodes_historiques_pers_phy
     )
@@ -764,22 +762,20 @@ class MonumentLieu(db.Model):
     commune: Mapped[List[Commune]] = relationship()
     siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_monu_lieu)
 
-    natures: Mapped[List[BibMonuLieuNature]] = relationship(
-        secondary=cor_natures_monu_lieu
-    )
+    # natures: Mapped[List[BibMonuLieuNature]] = relationship(
+    #     secondary=cor_natures_monu_lieu
+    # )
     etats_conservation: Mapped[List[BibEtatConservation]] = relationship(
         secondary=cor_etat_cons_monu_lieu
     )
     auteurs: Mapped[List[BibSourceAuteur]] = relationship(
         secondary=cor_source_auteur_monu_lieu
     )
-    contributeurs: Mapped[List[BibContributeur]] = relationship(
-        secondary=cor_contributeurs_monu_lieu
-    )
+    contributeurs: Mapped[str] = mapped_column()
 
-    redacteurs: Mapped[List[BibRedacteur]] = relationship(
-        secondary=cor_redacteurs_monu_lieu
-    )
+    # redacteurs: Mapped[List[BibRedacteur]] = relationship(
+    #     secondary=cor_redacteurs_monu_lieu
+    # )
 
     materiaux: Mapped[List[BibMateriaux]] = relationship(
         secondary=cor_materiaux_monu_lieu

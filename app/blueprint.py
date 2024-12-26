@@ -22,8 +22,8 @@ from app.models import (
     Commune,
     BibSiecle,
     BibEtatConservation,
-    BibMonuLieuNature,
-    BibDesignationMobImg,
+    # BibMonuLieuNature,
+    # BibDesignationMobImg,
     BibTechniquesMob,
     BibNaturesPersonnesMorales,
     BibProfessions,
@@ -41,7 +41,7 @@ from app.schemas import (
     CommuneSchema,
     BibSiecleSchema,
     BibEtatConservationSchema,
-    BibMonuLieuNatureSchema,
+    # BibMonuLieuNatureSchema,
     BibDesignationMobImgSchema,
     BibTechniquesMobSchema,
     BibNaturesPersonnesMoralesSchema,
@@ -127,22 +127,24 @@ def get_all_etat_conservation():
 
 @routes.route("/natures_monu", methods=["GET"])
 def get_all_natures_monu():
-    return BibMonuLieuNatureSchema().dump(
-        db.session.execute(
-            BibMonuLieuNature.select.order_by(BibMonuLieuNature.name)
-        ).scalars(),
-        many=True,
-    )
+    return "SUPPRIME"
+    # return BibMonuLieuNatureSchema().dump(
+    #     db.session.execute(
+    #         BibMonuLieuNature.select.order_by(BibMonuLieuNature.name)
+    #     ).scalars(),
+    #     many=True,
+    # )
 
 
 @routes.route("/designations_mob", methods=["GET"])
 def get_all_designations_mob():
-    return BibDesignationMobImgSchema().dump(
-        db.session.execute(
-            BibDesignationMobImg.select.order_by(BibDesignationMobImg.name)
-        ).scalars(),
-        many=True,
-    )
+    return "SUPPRIME"
+    # return BibDesignationMobImgSchema().dump(
+    #     db.session.execute(
+    #         BibDesignationMobImg.select.order_by(BibDesignationMobImg.name)
+    #     ).scalars(),
+    #     many=True,
+    # )
 
 
 @routes.route("/techniques_mob", methods=["GET"])
@@ -232,7 +234,7 @@ def get_one_monument_lieu(id):
         "redacteurs",
         "materiaux",
         "medias",
-        "natures",
+        # "natures",
         "siecles",
         "pays",
         "commune",
