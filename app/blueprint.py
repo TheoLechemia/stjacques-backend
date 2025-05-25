@@ -8,7 +8,7 @@ from sqlalchemy import func
 from PIL import Image, ImageOps
 from sqlalchemy.orm import joinedload
 
-
+print("?")
 routes = Blueprint("main", __name__)
 
 from app.models import (
@@ -22,8 +22,8 @@ from app.models import (
     Commune,
     BibSiecle,
     BibEtatConservation,
-    BibMonuLieuNature,
-    BibDesignationMobImg,
+    # BibMonuLieuNature,
+    BibNatureMobImg,
     BibTechniquesMob,
     BibNaturesPersonnesMorales,
     BibProfessions,
@@ -41,8 +41,8 @@ from app.schemas import (
     CommuneSchema,
     BibSiecleSchema,
     BibEtatConservationSchema,
-    BibMonuLieuNatureSchema,
-    BibDesignationMobImgSchema,
+    # BibMonuLieuNatureSchema,
+    BibNatureMobImgSchema,
     BibTechniquesMobSchema,
     BibNaturesPersonnesMoralesSchema,
     BibProfessionSchema,
@@ -127,19 +127,20 @@ def get_all_etat_conservation():
 
 @routes.route("/natures_monu", methods=["GET"])
 def get_all_natures_monu():
-    return BibMonuLieuNatureSchema().dump(
-        db.session.execute(
-            BibMonuLieuNature.select.order_by(BibMonuLieuNature.name)
-        ).scalars(),
-        many=True,
-    )
+    return "SUPPRIME"
+    # return BibMonuLieuNatureSchema().dump(
+    #     db.session.execute(
+    #         BibMonuLieuNature.select.order_by(BibMonuLieuNature.name)
+    #     ).scalars(),
+    #     many=True,
+    # )
 
 
-@routes.route("/designations_mob", methods=["GET"])
-def get_all_designations_mob():
-    return BibDesignationMobImgSchema().dump(
+@routes.route("/natures_mob", methods=["GET"])
+def get_all_natures_mob():
+    return BibNatureMobImgSchema().dump(
         db.session.execute(
-            BibDesignationMobImg.select.order_by(BibDesignationMobImg.name)
+            BibNatureMobImg.select.order_by(BibNatureMobImg.name)
         ).scalars(),
         many=True,
     )
@@ -228,11 +229,10 @@ def get_one_monument_lieu(id):
     fields = [
         "etats_conservation",
         "auteurs",
-        "contributeurs",
-        "redacteurs",
+        "auteurs_fiche",
         "materiaux",
         "medias",
-        "natures",
+        # "natures",
         "siecles",
         "pays",
         "commune",
@@ -271,16 +271,15 @@ def get_all_mobiliers_images():
 @routes.route("/mobiliers_images/<int:id>", methods=["GET"])
 def get_one_mobiliers_images(id):
     fields = [
-        "designations",
+        "natures",
         "commune",
         "pays",
         "siecles",
         "etats_conservation",
         "materiaux",
         "medias",
-        "contributeurs",
         "auteurs",
-        "redacteurs",
+        "auteurs_fiche",
         "personnes_morales_liees.medias",
         "monuments_lieux_liees.medias",
     ]
@@ -319,8 +318,7 @@ def get_one_personne_morale(id):
         "commune",
         "siecles",
         "medias",
-        "contributeurs",
-        "redacteurs",
+        "auteurs_fiche",
         "personnes_physiques_liees.medias",
         "mobiliers_images_liees.medias",
         "monuments_lieux_liees.medias",
@@ -361,8 +359,8 @@ def get_one_personne_physique(id):
         "modes_deplacements",
         "periodes_historiques",
         "professions",
-        "contributeurs",
-        "redacteurs",
+        "auteurs_fiche",
+        "attestation",
         "personnes_morales_liees.medias",
         "monuments_lieux_liees.medias",
     ]
