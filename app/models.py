@@ -65,14 +65,14 @@ cor_materiaux_mob_img = Table(
 
 
 
-# cor_natures_monu_lieu = Table(
-#     "cor_natures_monu_lieu",
-#     db.metadata,
-#     db.Column(
-#         "monu_lieu_nature_id", ForeignKey("bib_monu_lieu_natures_types.id")
-#     ),
-#     db.Column("monument_lieu_id", ForeignKey("t_monuments_lieux.id_monument_lieu")),
-# )
+cor_natures_monu_lieu = Table(
+    "cor_natures_monu_lieu",
+    db.metadata,
+    db.Column(
+        "monu_lieu_nature_id", ForeignKey("bib_monu_lieu_natures.id_monu_lieu_nature")
+    ),
+    db.Column("monument_lieu_id", ForeignKey("t_monuments_lieux.id_monument_lieu")),
+)
 
 cor_etat_cons_mob_img = Table(
     "cor_etat_cons_mob_img",
@@ -360,8 +360,8 @@ class BibSiecle(db.Model):
 
 
 class BibMonuLieuNature(db.Model):
-    __tablename__ = "bib_monu_lieu_natures_types"
-    id: Mapped[int] = mapped_column("id", primary_key=True)
+    __tablename__ = "bib_monu_lieu_natures"
+    id: Mapped[int] = mapped_column("id_monu_lieu_nature", primary_key=True)
     name: Mapped[str] = mapped_column("monu_lieu_nature_type")
 
 
@@ -498,12 +498,11 @@ class CategorieSelect(Select):
             else:
                 self = self.join(Commune).join(Departement).join(Region)
             self = self.filter(Region.id.in_(regions))
-
         if "etats_conservation" in params:
-            if hasattr(model, "etat_conservation"):
+            if hasattr(model, "etats_conservation"):
                 etats_conservation = params.getlist("etats_conservation")
                 self = self.filter(
-                    model.etat_conservation.any(
+                    model.etats_conservation.any(
                         BibEtatConservation.id.in_(etats_conservation)
                     )
                 )
@@ -515,15 +514,15 @@ class CategorieSelect(Select):
                 )
         if "natures_monu" in params:
             if hasattr(model, "natures"):
-                natures = params.getlist("natures_pers")
+                natures = params.getlist("natures_monu")
                 self = self.filter(model.natures.any(BibMonuLieuNature.id.in_(natures)))
 
         if "modes_deplacement" in params:
             if hasattr(model, "modes_deplacement"):
-                modes_deplacements = params.getlist("modes_deplacement")
+                modes_deplacement = params.getlist("modes_deplacement")
                 self = self.filter(
-                    model.modes_deplacements.any(
-                        BibDeplacements.id.in_(modes_deplacements)
+                    model.modes_deplacement.any(
+                        BibDeplacements.id.in_(modes_deplacement)
                     )
                 )
         if "professions" in params:
@@ -675,7 +674,7 @@ class PersonnePhysique(db.Model):
     id_commune: Mapped[int] = mapped_column(ForeignKey("loc_communes.id_commune"))
     id_attestation: Mapped[int] = mapped_column(ForeignKey("bib_pers_phy_attestation.id_attestation"))
     medias: Mapped[List[Media]] = relationship(secondary=cor_medias_pers_phy)
-    modes_deplacements: Mapped[List[BibDeplacements]] = relationship(
+    modes_deplacement: Mapped[List[BibDeplacements]] = relationship(
         secondary=cor_modes_deplacements_pers_phy
     )
     professions: Mapped[List[BibProfessions]] = relationship(
@@ -725,9 +724,9 @@ class MonumentLieu(db.Model):
     commune: Mapped[List[Commune]] = relationship()
     siecles: Mapped[List[BibSiecle]] = relationship(secondary=cor_siecles_monu_lieu)
 
-    # natures: Mapped[List[BibMonuLieuNature]] = relationship(
-    #     secondary=cor_natures_monu_lieu
-    # )
+    natures: Mapped[List[BibMonuLieuNature]] = relationship(
+        secondary=cor_natures_monu_lieu
+    )
     etats_conservation: Mapped[List[BibEtatConservation]] = relationship(
         secondary=cor_etat_cons_monu_lieu
     )

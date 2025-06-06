@@ -8,7 +8,6 @@ from sqlalchemy import func
 from PIL import Image, ImageOps
 from sqlalchemy.orm import joinedload
 
-print("?")
 routes = Blueprint("main", __name__)
 
 from app.models import (
@@ -22,7 +21,7 @@ from app.models import (
     Commune,
     BibSiecle,
     BibEtatConservation,
-    # BibMonuLieuNature,
+    BibMonuLieuNature,
     BibNatureMobImg,
     BibTechniquesMob,
     BibNaturesPersonnesMorales,
@@ -41,7 +40,7 @@ from app.schemas import (
     CommuneSchema,
     BibSiecleSchema,
     BibEtatConservationSchema,
-    # BibMonuLieuNatureSchema,
+    BibMonuLieuNatureSchema,
     BibNatureMobImgSchema,
     BibTechniquesMobSchema,
     BibNaturesPersonnesMoralesSchema,
@@ -127,13 +126,12 @@ def get_all_etat_conservation():
 
 @routes.route("/natures_monu", methods=["GET"])
 def get_all_natures_monu():
-    return "SUPPRIME"
-    # return BibMonuLieuNatureSchema().dump(
-    #     db.session.execute(
-    #         BibMonuLieuNature.select.order_by(BibMonuLieuNature.name)
-    #     ).scalars(),
-    #     many=True,
-    # )
+    return BibMonuLieuNatureSchema().dump(
+        db.session.execute(
+            BibMonuLieuNature.select.order_by(BibMonuLieuNature.name)
+        ).scalars(),
+        many=True,
+    )
 
 
 @routes.route("/natures_mob", methods=["GET"])
@@ -218,9 +216,8 @@ def get_all_monuments_lieux():
     q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).auto_filters(
         params, MonumentLieu
     )
-
+    print(q)
     monuments_lieux = db.session.execute(q).unique().scalars()
-
     return MonumentLieuSchema(only=fields).dump(monuments_lieux, many=True)
 
 
@@ -232,7 +229,7 @@ def get_one_monument_lieu(id):
         "auteurs_fiche",
         "materiaux",
         "medias",
-        # "natures",
+        "natures",
         "siecles",
         "pays",
         "commune",
@@ -280,6 +277,7 @@ def get_one_mobiliers_images(id):
         "medias",
         "auteurs",
         "auteurs_fiche",
+        "techniques",
         "personnes_morales_liees.medias",
         "monuments_lieux_liees.medias",
     ]
@@ -344,7 +342,7 @@ def get_all_personnes_physiques():
     q = PersonnePhysique.select.auto_joinload(
         PersonnePhysique, fields=fields
     ).auto_filters(params, PersonnePhysique)
-
+    print(q)
     personnes_physiques = db.session.execute(q).unique().scalars()
     return PersonnePhysiqueSchema(only=fields).dump(personnes_physiques, many=True)
 
@@ -356,7 +354,7 @@ def get_one_personne_physique(id):
         "siecles",
         "pays",
         "commune",
-        "modes_deplacements",
+        "modes_deplacement",
         "periodes_historiques",
         "professions",
         "auteurs_fiche",
