@@ -1,0 +1,10 @@
+/var/log/saintjacques/errors.log {
+    daily
+    rotate 8
+    size 100M
+    create
+    compress
+    postrotate
+    systemctl reload saintjacques || true
+    endscript
+}

@@ -7,14 +7,26 @@ Copier le fichier `config.toml.sample` en `config.toml` et le remplir
 pip install -e .
 ```
 
-Lancement
-=========
+Mode developpement
+=================
 
-```
-cd app
-flask run 
+::
+    cd app
+    flask run 
 
-# ou
+Exploitation (production)
+=========================
 
-gunicorn app.wsgi -b 127.0.0.1:5000
-```
+Le service systemd `saintjacques.service` contrôle le procesus de l'application.
+
+::
+
+    # Lancer le service
+    systemclt start saintjacques
+    # Arreter le service
+    systemclt stop saintjacques
+    # Vérifier que le service fonctionne bien
+    systemclt status saintjacques
+
+
+Les logs de l'application se situent dans le fichier `/var/log/saintjacques/errors.log`
