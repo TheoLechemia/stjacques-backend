@@ -32,7 +32,8 @@ setuptools.setup(
         "flask_marshmallow",
         "flask-cors",
         "Pillow<10.0.0",
-        "markdown"
+        "markdown",
+        "gunicorn"
     ],
     extras_require={
         "tests": [

@@ -15,8 +15,8 @@ from app.models import (
     BibMonuLieuNature,
     BibEtatConservation,
     BibSourceAuteur,
-    BibContributeur,
-    BibRedacteur,
+    # BibContributeur,
+    BibAutheurFiche,
     BibMateriaux,
     Media,
     MobilierImage,
@@ -26,12 +26,13 @@ from app.models import (
     Region,
     Departement,
     Commune,
-    BibDesignationMobImg,
+    BibNatureMobImg,
     BibTechniquesMob,
     BibNaturesPersonnesMorales,
     BibProfessions,
     BibDeplacements,
     BibPerdiodesHisto,
+    BibPersPhyAttestation
 )
 
 
@@ -70,14 +71,14 @@ class BibMateriauxSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
         model = BibMateriaux
 
 
-class BibRedacteurSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+class BibAutheurFicheSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
-        model = BibRedacteur
+        model = BibAutheurFiche
 
 
-class BibContributeur(ma.SQLAlchemyAutoSchema, FlattenMixin):
-    class Meta:
-        model = BibContributeur
+# class BibContributeur(ma.SQLAlchemyAutoSchema, FlattenMixin):
+#     class Meta:
+#         model = BibContributeur
 
 
 class BibEtatConservationSchema(ma.SQLAlchemyAutoSchema):
@@ -135,17 +136,21 @@ class BibDeplacementsFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
         model = BibDeplacements
 
 
-class BibDesignationMobImgSchema(ma.SQLAlchemyAutoSchema):
+class BibNatureMobImgSchema(ma.SQLAlchemyAutoSchema,):
     class Meta:
-        model = BibDesignationMobImg
+        model = BibNatureMobImg
 
 
-class BibDesignationMobImgSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
+class BibNatureMobImgSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
-        model = BibDesignationMobImg
+        model = BibNatureMobImg
 
 
 class BibTechniquesMobSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibTechniquesMob
+
+class BibTechniquesMobSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
     class Meta:
         model = BibTechniquesMob
 
@@ -201,6 +206,15 @@ class CommuneSchemaFlatten(ma.SQLAlchemyAutoSchema, FlattenMixin):
         model = Commune
 
 
+class BibPersPhyAttestationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = BibPersPhyAttestation
+
+
+class BibPersPhyAttestationFlattenSchema(ma.SQLAlchemyAutoSchema, FlattenMixin):
+    class Meta:
+        model = BibPersPhyAttestation
+
 class FlatteLocaliteMixin:
     @post_dump
     def flat_loc(self, data, **kw):
@@ -209,19 +223,24 @@ class FlatteLocaliteMixin:
             and type(data["commune"]) is dict
             and data["commune"] is not None
         ):
-            data["_departement"] = (
-                data.get("commune", {}).get("departement", {}).get("name", "")
-            )
-            data["_region"] = (
-                data.get("commune", {})
-                .get("departement", {})
-                .get("region")
-                .get("name", "")
-            )
+            if data["commune"]["departement"] is not None:
+                data["_departement"] = (
+                    data.get("commune", {}).get("departement", {}).get("name", "")
+                )
+
+            if data["commune"]["departement"]["region"] is not None:
+                data["_region"] = (
+                    data.get("commune", {})
+                    .get("departement", {})
+                    .get("region", {})
+                    .get("name", "")
+                )
             data["_commune"] = data.get("commune", {}).get("name")
             data["commune"] = data.pop("_commune")
-            data["departement"] = data.pop("_departement")
-            data["region"] = data.pop("_region")
+            if "_departement" in data:
+                data["departement"] = data.pop("_departement")
+            if "_region" in data:
+                data["region"] = data.pop("_region")
         return data
 
 
@@ -244,8 +263,7 @@ class MonumentLieuSchema(
     auteurs = Nested(BibSourceAuteurSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchema)
-    contributeurs = Nested(BibContributeur, many=True)
-    redacteurs = Nested(BibRedacteurSchema, many=True)
+    auteurs_fiche = Nested(BibAutheurFicheSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
 
     medias = Nested(MediaSchema, many=True)
@@ -275,14 +293,14 @@ class MobilierImageSchema(
     commune = Nested(CommuneSchema)
     departement = Nested(DepartementFlattenSchema)
     region = Nested(RegionFlattenSchema)
-    designations = Nested(BibDesignationMobImgSchemaFlatten, many=True)
+    natures = Nested(BibNatureMobImgSchemaFlatten, many=True)
     etats_conservation = Nested(BibEtatConservationFlattenSchema, many=True)
     materiaux = Nested(BibMateriauxSchema, many=True)
     personnes_morales_liees = Nested("PersonneMoraleSchema", many=True)
     monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
     auteurs = Nested(BibSourceAuteurSchema, many=True)
-    contributeurs = Nested(BibContributeur, many=True)
-    redacteurs = Nested(BibRedacteurSchema, many=True)
+    auteurs_fiche = Nested(BibAutheurFicheSchema, many=True)
+    techniques = Nested(BibTechniquesMobSchemaFlatten, many=True)
 
     categorie = fields.Constant("Mobilier & Images")
     meta_categorie = fields.Constant("mobiliers_images")
@@ -311,8 +329,7 @@ class PersonneMoraleSchema(
     natures = Nested(BibNaturesPersonnesMoralesFlattendSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchema)
-    contributeurs = Nested(BibContributeur, many=True)
-    redacteurs = Nested(BibRedacteurSchema, many=True)
+    auteurs_fiche = Nested(BibAutheurFicheSchema, many=True)
 
     mobiliers_images_liees = Nested("MobilierImageSchema", many=True)
     personnes_physiques_liees = Nested("PersonnePhysiqueSchema", many=True)
@@ -333,17 +350,17 @@ class PersonnePhysiqueSchema(
     source = MardownField()
 
     medias = Nested(MediaSchema, many=True)
-    modes_deplacements = Nested(BibDeplacementsFlattenSchema, many=True)
+    modes_deplacement = Nested(BibDeplacementsFlattenSchema, many=True)
     periodes_historiques = Nested(BibPerdiodesHistoFlattenSchema, many=True)
 
     siecles = Nested(BibSiecleFlattenSchema, many=True)
     professions = Nested(BibProfessionNestedSchema, many=True)
     pays = Nested(PaysSchemaFlatten)
     commune = Nested(CommuneSchema)
+    attestation = Nested(BibPersPhyAttestationFlattenSchema)
     personnes_morales_liees = Nested(PersonneMoraleSchema, many=True)
     monuments_lieux_liees = Nested(MonumentLieuSchema, many=True)
-    contributeurs = Nested(BibContributeur, many=True)
-    redacteurs = Nested(BibRedacteurSchema, many=True)
+    auteurs_fiche = Nested(BibAutheurFicheSchema, many=True)
 
     categorie = fields.Constant("Personnes physiques")
     meta_categorie = fields.Constant("personnes_physiques")

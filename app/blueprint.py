@@ -8,7 +8,6 @@ from sqlalchemy import func
 from PIL import Image, ImageOps
 from sqlalchemy.orm import joinedload
 
-
 routes = Blueprint("main", __name__)
 
 from app.models import (
@@ -23,7 +22,7 @@ from app.models import (
     BibSiecle,
     BibEtatConservation,
     BibMonuLieuNature,
-    BibDesignationMobImg,
+    BibNatureMobImg,
     BibTechniquesMob,
     BibNaturesPersonnesMorales,
     BibProfessions,
@@ -42,7 +41,7 @@ from app.schemas import (
     BibSiecleSchema,
     BibEtatConservationSchema,
     BibMonuLieuNatureSchema,
-    BibDesignationMobImgSchema,
+    BibNatureMobImgSchema,
     BibTechniquesMobSchema,
     BibNaturesPersonnesMoralesSchema,
     BibProfessionSchema,
@@ -135,11 +134,11 @@ def get_all_natures_monu():
     )
 
 
-@routes.route("/designations_mob", methods=["GET"])
-def get_all_designations_mob():
-    return BibDesignationMobImgSchema().dump(
+@routes.route("/natures_mob", methods=["GET"])
+def get_all_natures_mob():
+    return BibNatureMobImgSchema().dump(
         db.session.execute(
-            BibDesignationMobImg.select.order_by(BibDesignationMobImg.name)
+            BibNatureMobImg.select.order_by(BibNatureMobImg.name)
         ).scalars(),
         many=True,
     )
@@ -217,9 +216,8 @@ def get_all_monuments_lieux():
     q = MonumentLieu.select.auto_joinload(MonumentLieu, fields=fields).auto_filters(
         params, MonumentLieu
     )
-
+    print(q)
     monuments_lieux = db.session.execute(q).unique().scalars()
-
     return MonumentLieuSchema(only=fields).dump(monuments_lieux, many=True)
 
 
@@ -228,8 +226,7 @@ def get_one_monument_lieu(id):
     fields = [
         "etats_conservation",
         "auteurs",
-        "contributeurs",
-        "redacteurs",
+        "auteurs_fiche",
         "materiaux",
         "medias",
         "natures",
@@ -271,16 +268,16 @@ def get_all_mobiliers_images():
 @routes.route("/mobiliers_images/<int:id>", methods=["GET"])
 def get_one_mobiliers_images(id):
     fields = [
-        "designations",
+        "natures",
         "commune",
         "pays",
         "siecles",
         "etats_conservation",
         "materiaux",
         "medias",
-        "contributeurs",
         "auteurs",
-        "redacteurs",
+        "auteurs_fiche",
+        "techniques",
         "personnes_morales_liees.medias",
         "monuments_lieux_liees.medias",
     ]
@@ -319,8 +316,7 @@ def get_one_personne_morale(id):
         "commune",
         "siecles",
         "medias",
-        "contributeurs",
-        "redacteurs",
+        "auteurs_fiche",
         "personnes_physiques_liees.medias",
         "mobiliers_images_liees.medias",
         "monuments_lieux_liees.medias",
@@ -346,7 +342,7 @@ def get_all_personnes_physiques():
     q = PersonnePhysique.select.auto_joinload(
         PersonnePhysique, fields=fields
     ).auto_filters(params, PersonnePhysique)
-
+    print(q)
     personnes_physiques = db.session.execute(q).unique().scalars()
     return PersonnePhysiqueSchema(only=fields).dump(personnes_physiques, many=True)
 
@@ -358,11 +354,11 @@ def get_one_personne_physique(id):
         "siecles",
         "pays",
         "commune",
-        "modes_deplacements",
+        "modes_deplacement",
         "periodes_historiques",
         "professions",
-        "contributeurs",
-        "redacteurs",
+        "auteurs_fiche",
+        "attestation",
         "personnes_morales_liees.medias",
         "monuments_lieux_liees.medias",
     ]

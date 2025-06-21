@@ -15,8 +15,7 @@ from app.env import APP_DIR, db, ma
 
 def create_app():
     app = Flask(__name__)
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_host=1)
-
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     app.config.update(config)
     db.init_app(app)
     ma.init_app(app)
