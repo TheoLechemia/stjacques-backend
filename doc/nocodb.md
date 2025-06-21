@@ -7,7 +7,7 @@ Changer le mdp "owner" de nocodb
 
 - executer la requete SQL (en remplaçant le mail souhaité):
 
-::
+
 
     UPDATE nc_users_v2
     SET email='new_admin@mail.com'  --new mail

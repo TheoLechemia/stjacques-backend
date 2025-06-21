@@ -10,7 +10,7 @@ pip install -e .
 Mode developpement
 =================
 
-::
+
     cd app
     flask run 
 
@@ -19,7 +19,7 @@ Exploitation (production)
 
 Le service systemd `saintjacques.service` contrôle le procesus de l'application.
 
-::
+
 
     # Lancer le service
     systemclt start saintjacques
