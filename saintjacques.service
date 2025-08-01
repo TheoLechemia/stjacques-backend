@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=stjacq
 WorkingDirectory=/home/stjacq/stjacques-backend/
 Environment=GUNICORN_PROC_NAME=saintjacques
 Environment=GUNICORN_NUM_WORKERS=4
